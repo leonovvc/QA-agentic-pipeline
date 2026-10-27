@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: stage2-test-design-from-gap-report
+context:
+  scaffold_script: scaffold.sh

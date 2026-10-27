@@ -1,0 +1,32 @@
+{
+  "task_id": "next-gen-loyalty-experience-d4a1cd",
+  "title": "Next-gen loyalty experience",
+  "source": { "type": "text", "value": "specs/loyalty.md" },
+  "target_repo": "/tmp/claude-eval-mLAjME/home/cwd",
+  "output_language": "en",
+  "docs_dir": "docs/qa/next-gen-loyalty-experience-d4a1cd",
+  "status": "BLOCKED",
+  "created_at": "2026-10-27T12:01:22Z",
+  "updated_at": "2026-10-27T12:05:00Z",
+  "stages": [
+    { "stage": 1, "agent": "spec-analyst", "status": "blocked", "started_at": "2026-10-27T12:01:22Z", "completed_at": null, "output": [
+      "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-source.md",
+      "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-gap-report.md",
+      "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-annotated.md"
+    ] },
+    { "stage": 2, "agent": "qa-doc-writer", "status": "pending", "started_at": null, "completed_at": null, "output": null },
+    { "stage": 3, "agent": "autotest-builder", "status": "pending", "started_at": null, "completed_at": null, "output": null },
+    { "stage": 4, "agent": "qa-doc-reviewer", "status": "pending", "started_at": null, "completed_at": null, "output": null }
+  ],
+  "assumptions_log": [
+    "A1: Stopping after Stage 1 is acceptable because the user is away (procedural)",
+    "A2: Output language is English (explicit user request)",
+    "A3: Generic security checklist used because the spec states nothing (procedural)"
+  ],
+  "disputed_items": [],
+  "history": [
+    { "at": "2026-10-27T12:01:22Z", "event": "task_created" },
+    { "at": "2026-10-27T12:01:22Z", "event": "stage_started", "stage": 1 },
+    { "at": "2026-10-27T12:05:00Z", "event": "blocked", "stage": 1, "reason": "Spec is a vision statement with 0 testable requirements (testability 1/5); blocking gaps Q1-Q5" }
+  ]
+}

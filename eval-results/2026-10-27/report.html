@@ -1,0 +1,1828 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — qa-agentic-pipeline v1.0.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>qa-agentic-pipeline v1.0.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.311</span>
+<span class="num">2026-10-27 12:01 UTC</span>
+<span class="num">7m 32s</span>
+<span class="num">$3.29</span>
+<span class="num">8 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">90.1%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">8</span><span class="sub">6 of 8 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">62.5%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>orchestration-blocks-on-empty-spec</h2>
+<span class="muted mono">evals/orchestration-blocks-on-empty-spec</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">14 turns · $0.44 · 12:01:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">explains-the-block</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The QA pipeline stopped at Stage 1 and didn&apos;t run Stages 2–4, because `specs/loyalty.md` contains nothing testable. It&apos;s three paragraphs of vision statement: no user actions, rules, values, channels or metrics. Stage 1 found 0 requirements and scored testability 1/5. Test cases or autotests built from it would have been invented, so I marked the task `BLOCKED`.
+
+Stage 1 raised five blocking gaps:
+- **Q1:** The spec has no functional requirement at all.
+- **Q2:** &quot;All channels&quot; is never listed.
+- **Q3:** There is no baseline for what is new versus the current loyalty behavior.
+- **Q4:** &quot;Modern, intuitive and fun&quot; has no checkable criterion.
+- **Q5:** &quot;Stronger KPIs&quot; names no metric or target.
+
+It also wrote nine questions for the spec owner (Q7–Q15). They cover points, redemption and balances, access and personal data, channels, features, the behavior being replaced, UX criteria, KPIs and non-functional needs. Q15 asks whether a fuller spec exists, which is the quickest way to unblock.
+
+I made no assumptions about the requirements themselves. The only assumptions were procedural: stop after Stage 1 because you&apos;re away, write in English, and use a generic security checklist because the spec says nothing.
+
+Nothing is waiting on a decision from you, apart from whether you&apos;d rather force the pipeline on with invented assumptions, which I don&apos;t recommend.
+
+To continue, send the questions to the spec owner and re-run the pipeline once there&apos;s a testable spec. Stage 1 will restart because the task is blocked.
+
+The pipeline&apos;s progress file, board and checkpoint report are written. The shell was read-only for my first attempt at those, so I wrote them with the file tool instead. Everything is in `docs/qa/` (the files below are in `next-gen-loyalty-experience-d4a1cd/`):
+- `spec-gap-report.md`
+- `spec-annotated.md`
+- `spec-source.md`
+- `checkpoint.md`
+- `pipeline-state/next-gen-loyalty-experience-d4a1cd.json`
+- `pipeline-state/board.md`</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gap-report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/**/spec-gap-report.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-test-cases</span>  </summary>
+<div class="grader-body">
+<p class="explanation">**/test-cases-*.md absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-test-plan</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">**/test-plan.md absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched &quot;name&quot;:&quot;(Skill|Agent|Task)&quot;,&quot;input&quot;:\{[^\n]{0,400}(run-qa-pipeline)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-blocked</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched pipeline-state[^\n]{0,4000}BLOCKED</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Run the QA pipeline on specs/loyalty.md. I'm stepping away — don't wait for me; write everything in English.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">explains-the-block</span><span class="badge">llm</span></div>
+<div class="md"><p>The user asked to run a QA pipeline on a marketing-style "spec" that contains no checkable requirement (no behaviours, inputs, rules, or acceptance criteria — only aspirations like "delightful" and "stronger KPIs").</p>
+<p>PASS if the final reply says the pipeline stopped (blocked) because no testable requirement could be derived, and asks for — or lists — what the spec owner needs to provide before test design can start.
+FAIL if the reply presents a test plan or test cases, or claims the pipeline completed normally.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">gap-report-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/**/spec-gap-report.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-test-cases</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;**/test-cases-*.md&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-test-plan</span><span class="badge">file_exists</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;**/test-plan.md&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(run-qa-pipeline)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">state-blocked</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;pipeline-state[^\\n]{0,4000}BLOCKED&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>orchestration-resume-interrupted-stage3</h2>
+<span class="muted mono">evals/orchestration-resume-interrupted-stage3</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:77.8%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">77.8%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:77.8%"></span></span>
+<span class="num">77.8%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:77.8%"></span></span>
+<span class="num">77.8%</span>
+<span class="muted num">26 turns · $0.82 · 12:01:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checkpoint-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/pricing/checkpoint.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">earlier-stages-not-edited</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Edit called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">earlier-stages-not-rewritten</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Write called 3x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reaches-in-review</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched pipeline-state[^\n]{0,4000}IN_REVIEW</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">resume-reported</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Пайплайн по задаче `pricing` дошёл до конца и ждёт вашего решения. Статус задачи — `IN_REVIEW`. Все четыре этапа выполнены, в том числе перезапущенный этап 3.
+
+**Что я сделал**
+- **Этап 3:** вчера он оборвался на середине, поэтому я перезапустил его целиком. Автотесты теперь лежат в `tests/test_pricing.py`.
+- **Этап 4:** ревью записано в `docs/qa/pricing/qa-review-report.md`. Итоговый отчёт для вас — `docs/qa/pricing/checkpoint.md`.
+- **Статус и доска:** файл состояния и `board.md` обновил вручную.
+
+**Результат прогона:** 12 passed, 1 failed, 1 skipped.
+- **Упавший тест:** `TC-UNIT-004` нашёл дефект в коде. `shipping_cost` в `src/shop/pricing.py:33` сравнивает через `&gt;`. При сумме ровно 5000,00 доставка стоит 300,00, а в ТЗ написано «от 5000 ₽», то есть бесплатно. Код продукта я не менял.
+- **Пропущенный тест:** `TC-API-001` пропущен, потому что не задан `CART_API_URL` и сервиса корзины в репозитории нет.
+
+**Ревью:** 1 Blocking (тот же дефект с порогом доставки), 5 Major, 5 Minor и 3 спорных пункта, по которым нужно ваше решение.
+
+**Вам нужно сделать**
+- **Удалить `tests/test_pricing_partial.py`.** Это битый остаток прерванной сессии. Из Bash каталог `tests/` только для чтения, так что удалить его не получилось. Пока файл на месте, обычный `pytest` падает ещё на сборке.
+- **Решить три спорных пункта** (подробности в `checkpoint.md`):
+  1. Округление скидки: добавить тест «по допущению A1» или оставить округление непокрытым, пока аналитик не ответит на Q1.
+  2. Порог бесплатной доставки: считать до скидки участника или после. ТЗ допускает оба прочтения, код считает до скидки.
+  3. Нужен ли `TC-API-001` в плане, если сервиса корзины нет.
+- **Решить, менять ли `&gt;` на `&gt;=`.**
+
+Допущения, сделанные по ходу, перечислены в `checkpoint.md`. Мутационное тестирование не запускалось: в репозитории нет раннера.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stage3-redone</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/pricing/autotest-summary.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stage4-done</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/pricing/qa-review-report.md exists as expected</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Вчера сессия оборвалась посреди QA-пайплайна по задаче pricing. Продолжи пайплайн. Меня не будет до вечера — вопросы не задавай.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">checkpoint-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/pricing/checkpoint.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">earlier-stages-not-edited</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Edit&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;(spec-gap-report|spec-annotated|test-plan|test-cases-[a-z]+)\\.md&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">earlier-stages-not-rewritten</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Write&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;(spec-gap-report|spec-annotated|test-plan|test-cases-[a-z]+)\\.md&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reaches-in-review</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;pipeline-state[^\\n]{0,4000}IN_REVIEW&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">resume-reported</span><span class="badge">llm</span></div>
+<div class="md"><p>The user asked (in Russian) to resume a QA pipeline whose task file showed stages 1-2 done and stage 3 interrupted.</p>
+<p>PASS if the final reply makes clear the run resumed from stage 3 (not from scratch), and presents a checkpoint-style summary that includes a section for disputed items needing the user's decision (or explicitly says there are none). Russian or English wording are both acceptable.
+FAIL if the reply says it started the pipeline over from stage 1, or gives no checkpoint summary.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stage3-redone</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/pricing/autotest-summary.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stage4-done</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/pricing/qa-review-report.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-3">
+<div class="case-head">
+<h2>routing-concept-question-no-pipeline</h2>
+<span class="muted mono">evals/routing-concept-question-no-pipeline</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">1 turns · $0.08 · 12:01:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">answer-correct</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Equivalence partitioning splits the input space into classes that the system should treat the same way, so you test one representative from each class instead of every value. Boundary value analysis then focuses on the edges of those classes (min, max, just inside, just outside), because off-by-one and comparison-operator bugs cluster there.
+
+In practice, you use EP first to decide which groups to test, then BVA to pick the most failure-prone values within them. For example, with an age field that accepts 18–65, EP gives you &quot;&lt;18&quot;, &quot;18–65&quot; and &quot;&gt;65&quot;, and BVA adds 17, 18, 65 and 66.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-agents</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Agent called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-files</span>  </summary>
+<div class="grader-body">
+<p class="explanation">**/* absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-pipeline-skill</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 0..0)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Quick question: what's the practical difference between equivalence partitioning and boundary value analysis? Two or three sentences is enough.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">answer-correct</span><span class="badge">llm</span></div>
+<div class="md"><p>PASS if the reply explains that equivalence partitioning picks one representative value per class of inputs that behave the same, while boundary value analysis targets the values at and just beyond the edges of those classes (e.g. min-1, min, max, max+1), and it stays brief (no more than about 120 words).
+FAIL if either technique is described incorrectly or the reply is a long document.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-agents</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Agent&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-files</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;**/*&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-pipeline-skill</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;run-qa-pipeline&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-4">
+<div class="case-head">
+<h2>stage1-checkout-promo-planted-defects</h2>
+<span class="muted mono">evals/stage1-checkout-promo-planted-defects</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">93.3%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span></span>
+<span class="num">93.3%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span></span>
+<span class="num">93.3%</span>
+<span class="muted num">10 turns · $0.47 · 12:01:13 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">analysis-quality</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (20762 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Spec Gap Analysis — Promo codes at checkout (specs/checkout-promo.md, v1.3)
+
+## Source
+`specs/checkout-promo.md` (local Markdown file, v1.3, owner: Checkout team). Verbatim snapshot in `spec-source.md`. Text source, no extraction loss; confidence in the reading: high.
+No `.agents/qa-project-context.md` exists in this repository, so no org Definition of Ready was available; the generic checklist below was used. Output language: English (default).
+
+Note: the spec header says &quot;Status: Ready for development&quot;. Against the checklist at the bottom it is not ready for test design — one contradiction, two blocking gaps and many unspecified negative paths remain.
+
+## Testability Score: 2
+The happy path and the code format are checkable. The score is held down by one internal contradiction (expiry boundary), two requirements that cannot be tested as written (vouchers, &quot;fast&quot;), and the near-total absence of failure outcomes, money-rounding rules and cancellation/concurrency semantics.
+
+## Requirements Inventory
+| ID | Spec location | Requirement | Acceptance criterion | Testable |
+|---|---|---|---|---|
+| REQ-1 | §1 | &quot;Marketing creates promo codes in the admin panel.&quot; | none stated | partly → Q1, Q26 |
+| REQ-2 | §2, item 1 | &quot;A promo code is 6–12 characters long&quot; | length 6–12 | partly → Q2 |
+| REQ-3 | §2, item 1 | Code &quot;contains Latin letters and digits only&quot; | charset stated; outcome for violations none | partly → Q2 |
+| REQ-4 | §2, item 2 | &quot;Codes are not case-sensitive.&quot; | none stated beyond the sentence | yes |
+| REQ-5 | §2, item 3 | &quot;A code can be used up to and including its expiry date.&quot; | none stated for time of day / timezone | partly → Q4, Q5 |
+| REQ-6 | §2, item 4 | Percentage codes give 5%, 10%, 15% or 20% off the items subtotal | percentages stated; rounding none | partly → Q6, Q7 |
+| REQ-7 | §2, item 4 | Fixed-amount code gives &quot;500 ₽ off&quot; | 500 ₽ | partly → Q7 |
+| REQ-8 | §2, item 5 | Single-use code &quot;cannot be used again by anyone&quot; once an order with it is placed | none stated for &quot;placed&quot; / concurrency | partly → Q8, Q9 |
+| REQ-9 | §2, item 6 | &quot;Codes apply only to orders over 3000 ₽.&quot; | strict &quot;over&quot; 3000 ₽; basis of the amount none | partly → Q11, Q12 |
+| REQ-10 | §3, item 1 | Promo field shown under the order summary with an &quot;Apply&quot; button | position and button label stated | yes |
+| REQ-11 | §3, item 2 | Valid code applied → &quot;the discount line appears in the order summary&quot; | none stated for line content | partly → Q15 |
+| REQ-12 | §3, item 2 | Valid code applied → &quot;the total is updated&quot; | none stated for rounding | partly → Q6 |
+| REQ-13 | §3, item 3 | Expired code → message &quot;This promo code has expired&quot; shown under the field | exact message text and position | yes |
+| REQ-14 | §3, item 4 | &quot;Only one promo code can be applied to an order.&quot; | none stated | yes |
+| REQ-15 | §3, item 4 | &quot;Applying a second code replaces the first.&quot; | none stated for an invalid second code | partly → Q17 |
+| REQ-16 | §3, item 5 | &quot;Coupons cannot be combined with vouchers.&quot; | none stated | no → Q18 |
+| REQ-17 | §3, item 6 | &quot;Code validation must be fast.&quot; | none stated | no → Q19 |
+| REQ-18 | §4, item 1 | &quot;The discount is recorded on the order&quot; | none stated for what is recorded | partly → Q21 |
+| REQ-19 | §4, item 1 | Discount is &quot;shown in the order confirmation email&quot; | none stated for content | partly → Q22 |
+| REQ-20 | §4, item 2 | Order cancelled → &quot;a single-use code becomes available again&quot; | none stated for cancellation scope | partly → Q23 |
+| REQ-21 | §5, item 1 | &quot;Marketing can deactivate a code at any time&quot; | none stated | partly → Q24, Q25 |
+| REQ-22 | §5, item 1 | &quot;a deactivated code behaves like an expired one&quot; | behavior = REQ-13 by reference | partly → Q24 |
+| REQ-23 | §5, item 2 | &quot;Codes stop working at the start of their expiry date.&quot; | none stated | partly → Q4 |
+
+§6 (gift cards, loyalty points out of scope) is a scope statement, not a testable obligation, so it has no REQ. 23 REQs in total: 4 `yes` (REQ-4, 10, 13, 14), 2 `no` (REQ-16, 17), 17 `partly`.
+
+## Blocking Gaps
+**Q18** — §3, item 5 (&quot;Coupons cannot be combined with vouchers&quot;). &quot;Coupon&quot; and &quot;voucher&quot; are never defined anywhere in the spec; the rest of the document says &quot;promo code&quot;. It is unclear whether &quot;coupon&quot; = promo code, what a &quot;voucher&quot; is, whether a voucher is a gift card (§6 puts gift cards out of scope), how a customer would hold both, which one is rejected or removed, and what message is shown. No test with a concrete input and expected result can be written. Blocks REQ-16. Marker `[Q18]`.
+
+**Q19** — §3, item 6 (&quot;Code validation must be fast&quot;). No measurable target (latency percentile, load, environment). Cannot be verified or failed objectively. Blocks REQ-17 only; all functional requirements are unaffected. Marker `[Q19]`.
+
+(The expiry contradiction **Q4** below is also blocking for the &quot;on the expiry date itself&quot; boundary cases of REQ-5 and REQ-23.)
+
+## Contradictions
+**Q4** — §2, item 3 vs §5, item 2. §2.3: &quot;A code can be used up to and including its expiry date.&quot; §5.2: &quot;Codes stop working at the start of their expiry date.&quot; On the expiry date itself, the first says the code works, the second says it does not. The two rules produce opposite results for the single most important boundary of REQ-5/REQ-23 (day D). Blocking for boundary cases on day D; cases for D-1 and D+1 are unaffected. Marker `[Q4]`.
+
+## Open Questions
+### Track A — for you, now
+Per the run instruction (unattended, no questions to the operator), these were not asked in the conversation; each carries the default taken. Change them if the default is wrong.
+
+**Q26** — Is the admin panel (code creation / deactivation UI) in the test scope of this pass, or only the customer-facing checkout behavior? Default taken: A20 — admin is exercised only as a means to set up and deactivate codes (via UI, API or data seeding, whichever the later stages find available); the admin UI itself is not designed against. Marker `[Q26]`.
+
+**Q27** — Are non-functional checks (performance, rate limiting / enumeration, accessibility) in scope of this pass? Default taken: A14 — out of scope for the functional test design; they are recorded as spec gaps (Q14, Q19, Q20) and left to a separate decision. Marker `[Q27]`.
+
+**Q28** — May the pipeline proceed on a spec that has one contradiction and two blocking gaps? Default taken: A1 — yes, with blocked items kept visible: REQ-16, REQ-17 and the expiry-day boundary are marked blocked in Stage 2, not guessed. Marker `[Q28]`.
+
+### Track B — for the analyst / spec owner
+Ordered by the risk of the requirement each question blocks (money and access first). Each question stands alone; the likely owner is given in brackets. Entries without a bold ID are the Blocking Gap / Contradiction items already described above, repeated here in forwardable form.
+
+- (Q4) [PM / Checkout team] Section 2.3 says a promo code works &quot;up to and including its expiry date&quot;, but section 5.2 says codes &quot;stop working at the start of their expiry date&quot;. On the expiry date itself, does the code work or not?
+
+**Q8** — §2, item 5. [PM / backend lead] A single-use code &quot;cannot be used again&quot; once an order with it is &quot;placed&quot;. What event counts as &quot;placed&quot;: the order being created at checkout submit, successful payment, or order confirmation? If payment fails or the customer abandons the payment page, is the code consumed, reserved for some time, or still free?
+
+**Q9** — §2, item 5. [backend lead] If two customers apply the same single-use code and submit orders at the same moment, which order gets the discount and what does the other customer see (error, order without discount, order blocked)?
+
+**Q21** — §4, item 1 and §3, item 2. [backend lead] Between applying a code and placing the order the code may expire, be deactivated, be consumed by someone else, or the cart may fall to 3000 ₽ or below. Is eligibility re-checked when the order is placed? If the code is no longer valid at that moment, is the order rejected, placed without the discount, or placed with the discount anyway? And what exactly is stored on the order (code, type, percentage, discount amount in ₽, subtotal)?
+
+**Q23** — §4, item 2. [PM / backend lead] &quot;If the order is cancelled, a single-use code becomes available again.&quot; Who can cancel (customer, support, system on payment timeout), in which order statuses, and does this also apply to partial cancellation, returns and refunds? If the code has expired or been deactivated by the time of the cancellation, is it still restored (and thus still unusable)? Can anyone use the restored code, or only the original customer?
+
+- (Q18) [PM / Checkout team] Section 3.5 says &quot;Coupons cannot be combined with vouchers&quot;. What are &quot;coupons&quot; and &quot;vouchers&quot; as distinct from promo codes — is a voucher the same as a gift card? When a customer has both, which one is kept, which one is rejected, in what order, and what message is shown?
+
+**Q11** — §2, item 6. [PM] &quot;Codes apply only to orders over 3000 ₽.&quot; Which amount is compared with 3000 ₽: the items subtotal (as §2.4 uses), the subtotal after discounted/sale prices, the total including delivery, or the total after the promo discount? &quot;Over&quot; is read as strictly greater than 3000.00 ₽ — confirm.
+
+**Q12** — §2, item 6. [PM / UX] What does the customer see when a valid code is entered for an order of 3000 ₽ or less (message text, code kept or dropped)? And if a code is already applied and the customer then removes items or changes quantities so the order falls to 3000 ₽ or below — is the code removed, is the discount kept, or is checkout blocked? Likewise, when quantities change with a percentage code applied, is the discount recalculated?
+
+**Q6** — §2, item 4 and §3, item 2. [PM / backend lead] How is a percentage discount rounded to kopecks (half-up, half-even, down, up), and is it rounded per item or on the whole subtotal? Which value is rounded — the discount or the new total?
+
+**Q7** — §2, item 4. [PM] (a) Is 500 ₽ the only fixed amount, or an example (can marketing create 300 ₽ or 1000 ₽ codes)? Likewise, are 5/10/15/20% the only allowed percentages, and does the admin panel enforce that list? (b) What is included in &quot;items subtotal&quot;: are items already on sale included at their sale price, and are delivery and taxes excluded?
+
+**Q10** — §2, item 5. [PM] &quot;Some codes are single-use.&quot; How is the flag set (admin field at creation?), and what are the limits for all other codes — unlimited uses by anyone, a per-customer limit, a total limit? Can a guest (not logged in) use a code, and can the same customer use the same multi-use code on several orders?
+
+**Q25** — §5, item 1. [backend lead / security] Which admin roles may create and deactivate codes, and are these actions written to an audit log (who, when, which code)? What happens when a user without the role calls the same action?
+
+**Q14** — §3, item 1. [security / backend lead] Codes are 6–12 characters of letters and digits and the spec sets no limit on attempts. Is there rate limiting or temporary blocking after repeated invalid codes (per session, IP, account)? Should the error responses for &quot;does not exist&quot;, &quot;expired&quot; and &quot;already used&quot; be distinguishable (the &quot;expired&quot; message confirms the code exists)?
+
+**Q24** — §5, item 1. [PM / backend lead] When marketing deactivates a code, what happens to a cart that already has it applied and to a checkout in progress? Can a deactivated code be reactivated? Can a code that has already been used be deactivated? Does the deactivated code show exactly &quot;This promo code has expired&quot; (as &quot;behaves like an expired one&quot; implies), or a different message? Does deactivation touch orders already placed (it should not — confirm)?
+
+**Q17** — §3, item 4. [PM / UX] A promo code is already applied and the customer enters a second code. If the second code is invalid (expired, unknown, below threshold), does the first code stay applied or is it removed? What if the customer enters the same code again?
+
+**Q5** — §2, item 3. [PM / backend lead] An expiry is a date with no time or timezone. In which timezone does the expiry day begin and end (store timezone, server UTC, customer&apos;s timezone)? Which timezone is shown to marketing in the admin panel?
+
+**Q2** — §2, item 1. [PM / UX] What happens when the customer enters something that is not a valid code format: fewer than 6 or more than 12 characters, a space, hyphen or other symbol, Cyrillic characters that look like Latin ones, or an empty field? Is the Apply button disabled, is an inline error shown, or is the lookup simply &quot;not found&quot;? Are leading/trailing spaces trimmed? Is pasted text with a trailing space accepted?
+
+**Q16** — §3, item 3. [PM / UX] Only one error message is defined (&quot;This promo code has expired&quot;). What are the outcomes and exact messages for: unknown code, malformed code, single-use code already used, order of 3000 ₽ or less, voucher conflict, and a server error or timeout during validation? Is the total in all of these cases unchanged?
+
+**Q1** — §1. [PM / Marketing] What are the rules for creating a code in the admin panel: required fields, whether code uniqueness is checked case-insensitively (§2.2 means `SPRING10` and `spring10` would clash), whether the format of §2.1 and the percentage list of §2.4 is enforced at creation, and whether an existing code&apos;s expiry, type or value can be edited?
+
+- (Q19) [tech lead / PM] Section 3.6 says &quot;Code validation must be fast&quot;. What is the target: response time at which percentile, under what load, in which environment?
+
+**Q22** — §4, item 1. [PM] What does the confirmation email show about the discount: the code, the discount line with an amount, the new total? In which language and at what point is it sent, and does a failure to send the email affect the order?
+
+**Q15** — §3, item 2. [UX] What does the &quot;discount line&quot; look like: label text (does it show the code?), sign and format of the amount (e.g. &quot;−500 ₽&quot;), position relative to the subtotal and total? What is the exact result for a percentage code — is the percentage shown?
+
+**Q13** — §3, item 1. [UX] Can the customer remove an applied code (and how)? Does the applied code survive a page reload or leaving and returning to checkout within the same cart? Is the field editable after a code is applied? Does pressing Enter in the field act as &quot;Apply&quot;?
+
+**Q20** — §3 (silence). [PM / UX] The spec says nothing about accessibility (error message announced to screen readers, keyboard use), localization (the only message is in English, while the prices are in ₽ — is the English text final or is there a translated message?), or supported browsers/devices and mobile layout. Are any of these in scope?
+
+**Q3** — §2, item 2. [UX] Codes are not case-sensitive. In what case is the code shown back to the customer (as typed, as stored, uppercase) on the discount line and in the email?
+
+## Assumptions Made to Proceed
+**A1** — (Q4, Q28) The contradiction is not resolved by choosing a side. Boundary cases for the expiry day itself are marked blocked in Stage 2; cases for the day before expiry (code works) and the day after (code does not work) are valid under both readings and proceed. Why: both readings are plausible and either would silently invent a requirement.
+
+**A2** — (Q5) A single business timezone is used and tests avoid sub-day precision: expiry cases use dates at least one full day away from &quot;today&quot;. Why: it keeps cases valid regardless of the timezone chosen.
+
+**A3** — (Q6) Percentage discount is computed on the items subtotal and rounded half-up to 0.01 ₽; the total is subtotal − discount. Contestable — rounding is a money rule the owner should confirm.
+
+**A4** — (Q7) 500 ₽ and 5/10/15/20% are the only values; &quot;items subtotal&quot; = sum of line price × quantity of the cart items at their displayed price, excluding delivery and taxes. Why: the spec lists exactly these values and names &quot;items subtotal&quot;.
+
+**A5** — (Q8) &quot;Placed&quot; = the order was successfully created at checkout submission. Failed or
+[…762 more chars — full text in aggregate-result.json…]
+r than expiry (unknown, malformed, already used, below threshold): the code is not applied, the total is unchanged, and some visible error is shown; only the expired message text is asserted. Eligibility is re-evaluated when the cart changes. Contestable.
+
+**A10** — (Q13) Removal of an applied code and persistence across reload are not tested.
+
+**A11** — (Q17) If a second code is invalid, the first code stays applied. Contestable — the opposite reading (first code is dropped) is also reasonable.
+
+**A12** — (Q18) No assumption: REQ-16 is blocked, no cases are written for it.
+
+**A13** — (Q19, Q27) REQ-17 is excluded from functional test design; if a performance check is wanted, it needs a numeric target first.
+
+**A14** — (Q14, Q20, Q27) Rate limiting, enumeration resistance, accessibility, localization and browser/device matrix are out of this pass&apos;s functional design and stay recorded as gaps.
+
+**A15** — (Q21) Eligibility is re-validated server-side when the order is placed: an order cannot receive a discount from a code that is expired, deactivated or already consumed at that moment. Contestable.
+
+**A16** — (Q23) Cancelling an order restores a single-use code to &quot;unused&quot; regardless of who cancels it; if it has expired or been deactivated in the meantime it is restored but remains unusable.
+
+**A17** — (Q24) A deactivated code shows the same message as an expired code (&quot;This promo code has expired&quot;), reading §5.1 literally. Contestable — the message is misleading for the customer.
+
+**A18** — (general) One currency (RUB, ₽); amounts have kopeck precision (2 decimals).
+
+**A19** — (security, Q21) Discount amounts are calculated server-side from the code and the cart; the client cannot send its own discount value. Why: baseline for any pricing feature; tests will try to tamper with it as a negative case.
+
+**A20** — (Q26) The admin panel is not tested as a UI; codes are created and deactivated through whichever mechanism the later stages find available (admin UI, API or seed data).
+
+## Security Lens
+Triggers present: user input (code field), pricing/payment amount, admin actions, personal data (confirmation email).
+
+| OWASP 2025 area | Applies? | Result |
+|---|---|---|
+| A01 Broken Access Control | Yes — deactivation/creation of codes in the admin panel; single-use &quot;by anyone&quot; | Q25 (roles, unauthorized calls); Q10 (who may use a code) |
+| A05 Injection | Yes — free-text code field | Q2 (what the field accepts); format is restricted to letters/digits by §2.1, so injection strings should be rejected as malformed — covered under Q2 |
+| A06 Insecure Design | Yes — no attempt limit, distinguishable errors, race on single-use, replay after cancel | Q14 (enumeration / brute force), Q9 (race), Q23 (restore after cancel), A19 (server-side pricing) |
+| A09 Security Logging &amp; Alerting Failures | Yes — admin deactivation and repeated failed attempts | Q25 (audit log), Q14 |
+| A10 Mishandling of Exceptional Conditions | Yes — validation timeout or backend error during Apply | Q16 (outcome when validation fails) |
+| A07 Authentication Failures | Not applicable beyond Q10 — no login or session behavior is specified by this feature | — |
+| A04 Cryptographic Failures, A02 Security Misconfiguration, A03 Supply Chain, A08 Integrity Failures | Not applicable — no secrets, configuration, dependencies or signed artifacts in this spec | — |
+| Personal data | The confirmation email carries order data only; no new personal data introduced by the feature | Q22 (email content) |
+
+## Ready-for-Test-Design Checklist
+- [ ] Every in-scope user action has a success and failure outcome — only the success path and the &quot;expired&quot; failure are defined (Q16, Q2, Q12)
+- [ ] Every acceptance criterion is objectively checkable — REQ-16 and REQ-17 are not (Q18, Q19)
+- [ ] Edge cases are addressed or explicitly out of scope — rounding, threshold basis, concurrency, timezone and cancellation are not (Q6, Q11, Q9, Q5, Q23)
+- [ ] No unresolved contradictions remain — Q4 is open
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">annotated-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/checkout-promo/spec-annotated.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">finds-boundary-3000</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in file docs/qa/checkout-promo/spec-gap-report.md</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-brute-force</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched brute|enumerat|rate.?limit|number of attempts|attempts? (limit|per)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-expiry-contradiction</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Contradictions[\s\S]*?(5\.2|start of (its|the) expiry)[\s\S]*?## Open Questions</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-untestable-fast</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched fast[^\n]{0,200}(measur|threshold|ms\b|millisecond|second|latency|response time|untestable|not testable)|(measur|untestable|not testable)[^\n]{0,200}fast</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">inline-markers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \[Q\d+[:\]][\s\S]*\[Q\d+[:\]][\s\S]*\[A\d+[:\]]|\[A\d+[:\]][\s\S]*\[Q\d+[:\]][\s\S]*\[Q\d+[:\]]</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-test-plan-yet</span>  </summary>
+<div class="grader-body">
+<p class="explanation">**/test-plan.md absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched &quot;name&quot;:&quot;(Skill|Agent|Task)&quot;,&quot;input&quot;:\{[^\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/checkout-promo/spec-gap-report.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">requirements-inventory</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Requirements Inventory[\s\S]*\| *\**REQ-1\** *\|[\s\S]*REQ-8</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">security-lens-applied</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Security Lens\s*\n(?!\s*(Not applicable|N/A))</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Here's the spec for our new promo-code feature: specs/checkout-promo.md. Before anyone writes test cases, I need the spec analysis only — gaps, contradictions, open questions, what's testable. Don't write a test plan yet.</p>
+<p>Work unattended, don't ask me anything — log any assumption you have to make. Write the documents in English and save them under docs/qa/checkout-promo/.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">analysis-quality</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>This is a QA spec-gap report for a promo-code spec. In the spec, §2.3 says a code is usable up to and including its expiry date, while §5.2 says codes stop working at the start of their expiry date.</p>
+<p>PASS if all of the following hold:</p>
+<ul>
+<li>That §2.3/§5.2 conflict is reported as a contradiction (not merely as an assumption).</li>
+<li>Blocking gaps and assumptions are listed in separate sections.</li>
+<li>Open questions are split into a Track A list and a Track B list.</li>
+<li>The report does not present invented requirements as facts (anything not in the spec is framed as a question or an explicit assumption).</li>
+</ul>
+<p>FAIL if any of these is missing, or if every single finding is labelled blocking.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">annotated-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/checkout-promo/spec-annotated.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-boundary-3000</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(exactly|equal to|&gt;=|≥|inclusive|at least)[^\\n]{0,80}3[ ,]?000|3[ ,]?000[^\\n]{0,80}(exactly|equal|&gt;=|≥|inclusive|at least)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-brute-force</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;brute|enumerat|rate.?limit|number of attempts|attempts? (limit|per)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-expiry-contradiction</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Contradictions[\\s\\S]*?(5\\.2|start of (its|the) expiry)[\\s\\S]*?## Open Questions&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-untestable-fast</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;fast[^\\n]{0,200}(measur|threshold|ms\\b|millisecond|second|latency|response time|untestable|not testable)|(measur|untestable|not testable)[^\\n]{0,200}fast&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">inline-markers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-annotated.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[A\\d+[:\\]]|\\[A\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-test-plan-yet</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;**/test-plan.md&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">requirements-inventory</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Requirements Inventory[\\s\\S]*\\| *\\**REQ-1\\** *\\|[\\s\\S]*REQ-8&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">security-lens-applied</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/checkout-promo/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Security Lens\\s*\\n(?!\\s*(Not applicable|N/A))&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-5">
+<div class="case-head">
+<h2>stage1-password-reset-security-lens-ru</h2>
+<span class="muted mono">evals/stage1-password-reset-security-lens-ru</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">15 turns · $0.35 · 12:03:23 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-account-enumeration</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched перечисл|enumerat|раскрыва[а-я]* (факт|наличи|существ)|узна[а-я]* ,? ?(зарегистр|существ)|одинаков[а-я]* (сообщ|ответ)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-rate-limit</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched rate.?limit|лимит|ограничени[ея] (числа|количества|частоты)|частот[а-я]* запрос|спам|перебор</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">finds-token-lifetime</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (токен|ссылк)[^\n]{0,160}(срок|время жизни|истека|TTL|действител)|(срок|время жизни|TTL)[^\n]{0,160}(токен|ссылк)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched &quot;name&quot;:&quot;(Skill|Agent|Task)&quot;,&quot;input&quot;:\{[^\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/password-reset/spec-gap-report.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">security-lens-section</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## (Security Lens|Безопасность)[^\n]*\n[\s\S]{0,4000}A0?7</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">security-quality</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (11091 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Анализ ТЗ — Восстановление пароля
+
+## Источник
+specs/password-reset.md, версия 0.9, владелец — команда «Аккаунт» (markdown, текст извлечён без потерь). Снимок: spec-source.md; текст с пометками: spec-annotated.md.
+
+## Оценка тестируемости: 2
+Основной путь описан, но у ключевых требований нет проверяемых критериев (срок токена, «надёжный» пароль, поведение при плохом токене), а механизм безопасности почти не специфицирован.
+
+## Перечень требований
+| ID | Место в ТЗ | Требование | Критерий приёмки | Тестируемо |
+|---|---|---|---|---|
+| REQ-1 | §1 | Забывший пароль пользователь может задать новый пароль через ссылку из письма | не указан (сквозной сценарий) | partly → Q9, Q11, Q14 |
+| REQ-2 | §2.1 | На странице входа есть ссылка «Забыли пароль?», ведущая на форму с полем «Email» | ссылка и поле присутствуют | yes |
+| REQ-3 | §2.2 | После нажатия «Отправить» система ищет пользователя по email | не указан | partly → Q2, Q3 |
+| REQ-4 | §2.3 | Если пользователь найден, на его email отправляется письмо со ссылкой для сброса | не указан (содержимое, сроки) | partly → Q4, Q5, Q6 |
+| REQ-5 | §2.3 | Если пользователь найден, показывается сообщение «Письмо отправлено» | текст сообщения | yes |
+| REQ-6 | §2.4 | Если пользователь не найден, показывается «Пользователь с таким email не зарегистрирован» | текст сообщения | partly → Q8 |
+| REQ-7 | §3.1 | Ссылка содержит уникальный токен | не указан | partly → Q10 |
+| REQ-8 | §3.2 | По ссылке открывается форма «Новый пароль» и «Повторите пароль» | не указан для неверных токенов | partly → Q11 |
+| REQ-9 | §3.3 | Новый пароль должен быть надёжным | не указан | no → Q14 |
+| REQ-10 | §4.1 | Если пароли в двух полях совпадают, пароль меняется | новый пароль работает при входе (выведено, не заявлено) | partly → Q16 |
+| REQ-11 | §4.1 | После смены пользователь перенаправляется на страницу входа | редирект на страницу входа | yes |
+| REQ-12 | §4.2 | Если пароли не совпадают, показывается «Пароли не совпадают» | текст сообщения | yes |
+| REQ-13 | §4.3 | После смены пароля на email отправляется уведомление | не указан (содержимое, сроки) | partly → Q21 |
+
+## Блокирующие пробелы
+Без ответа нельзя написать кейс с определённым ожидаемым результатом.
+
+1. **Q9** — §3.1: не задан срок жизни токена. Нельзя проверить ни границу «ещё действует / уже просрочен», ни то, что просроченная ссылка отвергается. Блокирует REQ-1, REQ-7, REQ-8. Маркер в spec-annotated.md.
+2. **Q11** — §3.1–3.2: нет поведения для токена просроченного, использованного, заменённого новым, повреждённого или несуществующего (какая страница, какой текст, куда ведёт). Блокирует негативные сценарии REQ-8.
+3. **Q14** — §3.3: «надёжный» не определён и непроверяем (длина, классы символов, словарь запрещённых). Блокирует REQ-9 целиком и границы для REQ-10.
+
+## Противоречия
+1. **Q1** — шапка: «Версия 0.9» (черновик) против «Статус: готово к разработке», при том что документ содержит три блокирующих пробела. Не блокирует тест-дизайн, но статус нельзя считать подтверждением полноты.
+2. **Q16** — §3.3 («пароль должен быть надёжным») против §4.1 (пароль меняется, если поля совпадают — других условий нет). Совпадающие слабые пароли: меняются или отклоняются, и каким сообщением? Тест-дизайн по REQ-9/REQ-10 зависит от ответа.
+
+## Открытые вопросы
+
+### Track A — для вас, сейчас
+(нет) Вы просили работать без вопросов, поэтому решения уровня оператора приняты как допущения A1–A8 ниже. Если какое-то из них неверно — скажите, это дёшево исправить до тест-плана.
+
+### Track B — для аналитика / владельца ТЗ (команда «Аккаунт»)
+Каждый вопрос самодостаточен; порядок — по риску затронутого требования (доступ и учётные данные в начале).
+
+1. **Q11** — Что должен увидеть пользователь, если открыл ссылку сброса с токеном, который просрочен, уже использован, заменён более новым запросом или не существует/повреждён (текст, страница, есть ли ссылка на повторный запрос)? Нужно ли различать эти случаи в ответе?
+2. **Q9** — Каков срок жизни токена сброса пароля (в минутах/часах) и от какого момента он отсчитывается?
+3. **Q10** — Каковы требования к токену: источник случайности и минимальная длина, хранится ли он в базе в виде хэша, одноразовый ли он?
+4. **Q17** — Завершаются ли все существующие сессии и refresh-токены пользователя (на всех устройствах) после смены пароля?
+5. **Q8** — Сообщение «Пользователь с таким email не зарегистрирован» позволяет определить, какие email есть в системе. Это сознательное решение, или на оба случая нужен одинаковый ответ (например, «Если адрес зарегистрирован, письмо отправлено») и одинаковое время ответа?
+6. **Q7** — Какие ограничения частоты запросов и защита от автоматизации нужны на форме запроса (по IP, по email; капча; лимит писем в час) и на форме нового пароля? Что видит пользователь при превышении лимита?
+7. **Q12** — Погашается ли токен при открытии ссылки (GET) или только при успешной отправке формы нового пароля? Как защищаемся от предзагрузки ссылки почтовыми сканерами и утечки токена через Referer и логи?
+8. **Q3** — Могут ли сбросить пароль: неподтверждённые, заблокированные, удалённые аккаунты; аккаунты, созданные через соцсети и не имеющие пароля; аккаунты с включённой 2FA (сброс пароля не должен обходить второй фактор)? Что видит пользователь в каждом случае?
+9. **Q14** — Какова политика надёжности нового пароля: минимальная и максимальная длина, обязательные классы символов, список запрещённых паролей, допустимость пробелов и Unicode? Какое сообщение показывается при нарушении?
+10. **Q18** — Остаётся ли токен действительным после неудачной попытки (несовпадение, слабый пароль)? Как обрабатывается двойная отправка формы и использование одного токена в двух вкладках одновременно?
+11. **Q16** — Если оба поля совпадают, но пароль не соответствует политике надёжности, пароль меняется или отклоняется? Каким сообщением?
+12. **Q20** — Если пароли одновременно не совпадают и слабые, какое сообщение показывается первым? Проверка совпадения выполняется только в браузере или и на сервере? Сохраняется ли ввод в полях после ошибки?
+13. **Q15** — Разрешено ли новым паролем указать текущий пароль или один из прежних?
+14. **Q4** — Каково содержимое письма со ссылкой (отправитель, тема, текст, язык), откуда берётся базовый адрес ссылки (фиксированная настройка, а не заголовок Host запроса) и в какой срок письмо должно быть доставлено?
+15. **Q5** — Что видит пользователь, если письмо не удалось отправить (почтовый сервис недоступен, таймаут)? Сообщение «Письмо отправлено» показывается при любом исходе?
+16. **Q6** — Что происходит при повторных запросах на один email: прежние токены аннулируются? Есть ли минимальный интервал между письмами и возможность «отправить ещё раз»?
+17. **Q21** — Каково содержимое уведомления о смене пароля (в нём не должно быть пароля и токена), что происходит при сбое его отправки — смена пароля остаётся в силе?
+18. **Q13** — Что происходит, если ссылку сброса открывает уже авторизованный пользователь? Нужно ли маскировать поля пароля, задан ли запрет автозаполнения и максимальная длина ввода?
+19. **Q2** — Как обрабатывается пустое поле «Email», невалидный формат, пробелы по краям, чувствительность к регистру, слишком длинное значение?
+20. **Q19** — Показывается ли сообщение об успешной смене на странице входа после редиректа? Что видит пользователь при сбое сервиса или БД в момент смены пароля?
+21. **Q22** — Какие нефункциональные требования действуют: время отклика, доступность (a11y), локализация, поддерживаемые браузеры и устройства, аудит-логирование запросов и смен пароля?
+22. **Q1** — Каков фактический статус ТЗ: версия 0.9 (черновик) или «готово к разработке»? Планируется ли новая версия, закрывающая вопросы выше?
+
+## Допущения
+1. **A1** — Тексты «Письмо отправлено», «Пользователь с таким email не зарегистрирован», «Пароли не совпадают» — дословный ожидаемый результат, включая регистр и пунктуацию. Причина: ТЗ приводит их в кавычках.
+2. **A2** — «Пароли совпадают» = точное равенство значений двух полей с учётом регистра, без обрезки пробелов. Причина: иное в ТЗ не сказано, это самое простое прочтение. Спорно, если команда обрезает пробелы.
+3. **A3** — До ответа на Q8 требованием считается текст §2.4 как есть; различие ответов фиксируется как риск безопасности, а не как «правильное» поведение. Спорно: если владелец решит унифицировать ответ, кейсы по REQ-5 и REQ-6 меняются.
+4. **A4** — «Уникальный токен» = каждый запрос порождает новое значение, не совпадающее с выданными другим запросам и пользователям. Непредсказуемость и одноразовость не подразумеваются (см. Q10).
+5. **A5** — Поиск по email — точное совпадение; регистр, пробелы и формат не специфицированы (Q2), кейсы на них отложены.
+6. **A6** — Работа продолжается на неполном ТЗ. Требования, зависящие от Q9, Q11, Q14, помечаются как заблокированные в тест-плане; значения (срок токена, правила пароля) не придумываются.
+7. **A7** — Файла `.agents/qa-project-context.md` нет: используется общий чек-лист готовности, язык документов — русский, task-id = `password-reset` (из пути, указанного в задаче).
+8. **A8** — Включён security lens: функция затрагивает аутентификацию, пользовательский ввод и персональные данные.
+
+## Безопасность
+Применимые строки OWASP Top 10 (2025):
+- **A01 Broken Access Control** — владение аккаунтом доказывается только токеном: Q11 (невалидные токены), Q18 (повторное и параллельное использование), Q3 (какие аккаунты допускаются), Q13.
+- **A02 Security Misconfiguration** — токен в URL: утечка через Referer, логи, предзагрузку: Q12.
+- **A04 Cryptographic Failures** — энтропия, хранение хэша, одноразовость токена: Q10, Q9.
+- **A05 Injection** — email из формы попадает в запрос поиска и в письмо; базовый URL ссылки не должен браться из заголовка Host: Q2, Q4.
+- **A06 Insecure Design** — перечисление пользователей по различию сообщений (Q8), отсутствие лимитов запросов (Q7), повторные токены (Q6).
+- **A07 Authentication Failures** — слабые пароли (Q14, Q16), сессии после смены (Q17), смена пароля при 2FA/соцвходе (Q3).
+- **A09 Security Logging &amp; Alerting Failures** — события восстановления не упомянуты в аудите: Q22.
+- **A10 Mishandling of Exceptional Conditions** — сбой отправки письма и сбой при смене пароля: Q5, Q19, Q21.
+
+Не применимы: **A03 Software Supply Chain Failures** и **A08 Software or Data Integrity Failures** — ТЗ не вводит сторонних компонентов, обновлений или сериализуемых данных, о которых можно спрашивать на уровне требований.
+
+## Готовность к тест-дизайну
+- [ ] У каждого действия пользователя есть исход при успехе и при сбое — нет: нет исходов для плохого токена (Q11), сбоя почты (Q5), пустого/невалидного email (Q2)
+- [ ] Каждый критерий приёмки объективно проверяем — нет: REQ-9 («надёжный», Q14), срок токена (Q9)
+- [ ] Граничные случаи описаны или явно вынесены из объёма — нет: Q2, Q15, Q18, Q22
+- [ ] Нет неразрешённых противоречий — нет: Q1, Q16
+
+Итог: тест-дизайн можно начинать для REQ-2, 5, 11, 12 и частично для остальных; REQ-9 и негативные сценарии токена заблокированы до ответов на Q9, Q11, Q14. Рекомендуется отправить владельцу ТЗ как минимум верхние 5–9 вопросов Track B.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">written-in-russian</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (Перечень требований|Требования)[\s\S]*[А-Яа-я]{4,}[\s\S]*[А-Яа-я]{4,}</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Проанализируй ТЗ на восстановление пароля: specs/password-reset.md. Нужен только анализ ТЗ (пробелы, противоречия, вопросы аналитику), тест-план пока не пиши.</p>
+<p>Работай без вопросов ко мне, все допущения фиксируй в отчёте. Документы — на русском, в папку docs/qa/password-reset/.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-account-enumeration</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/password-reset/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;перечисл|enumerat|раскрыва[а-я]* (факт|наличи|существ)|узна[а-я]* ,? ?(зарегистр|существ)|одинаков[а-я]* (сообщ|ответ)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-rate-limit</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/password-reset/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;rate.?limit|лимит|ограничени[ея] (числа|количества|частоты)|частот[а-я]* запрос|спам|перебор&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">finds-token-lifetime</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/password-reset/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(токен|ссылк)[^\\n]{0,160}(срок|время жизни|истека|TTL|действител)|(срок|время жизни|TTL)[^\\n]{0,160}(токен|ссылк)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/password-reset/spec-gap-report.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">security-lens-section</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/password-reset/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## (Security Lens|Безопасность)[^\\n]*\\n[\\s\\S]{0,4000}A0?7&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">security-quality</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>This is a Russian-language QA spec-gap report for a password-reset spec. The spec shows a different message when the email is not registered, never says how long the reset link is valid, never says whether the link can be reused, and never limits how often a reset can be requested.</p>
+<p>PASS if the report (in Russian) raises at least three of those four issues as open questions or gaps (not as facts it decided on its own), and routes product-rule questions to the analyst/spec owner (Track B).
+FAIL if fewer than three are raised, if the report is mostly in English, or if it silently decides the security rules itself without flagging them.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">written-in-russian</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/password-reset/spec-gap-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(Перечень требований|Требования)[\\s\\S]*[А-Яа-я]{4,}[\\s\\S]*[А-Яа-я]{4,}&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-6">
+<div class="case-head">
+<h2>stage2-test-design-from-gap-report</h2>
+<span class="muted mono">evals/stage2-test-design-from-gap-report</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">5 turns · $0.70 · 12:04:29 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">bva-quantity</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched TC-[A-Z]+-\d{3}[^\n]{0,6000}[Qq]uantity[^\n]{0,600}\b21\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">bva-shipping-threshold</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched 4[ ,]?999[.,]99[^\n]{0,4000}5[ ,]?000|5[ ,]?000[^\n]{0,4000}4[ ,]?999[.,]99</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">decision-table-named</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \*\*Technique:\*\*\s*Decision table</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">illegal-transition</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched \*\*Technique:\*\*\s*State transition[^\n]{0,200}(illegal|invalid|forbidden)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-autotests-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">**/*.{spec,test}.{ts,js} absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plan-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/cart-orders/test-plan.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plan-has-risk-assessment</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Risk Assessment[\s\S]*P0</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plan-quality</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (9777 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Test plan — Cart limits, shipping and order cancellation (cart-orders)
+
+Output language: English. Inputs: `spec-source.md`, `spec-gap-report.md`, `spec-annotated.md`.
+
+## Scope
+
+**In scope (all six requirements):**
+- REQ-1 Quantity per line 1..20, including quantity abuse (negative, huge, non-integer, non-numeric)
+- REQ-2 Out-of-range error message and kept previous quantity
+- REQ-3 Subtotal calculation and recalculation after every change
+- REQ-4 Shipping 300 ₽, free from 5000 ₽
+- REQ-5 Loyalty member 5% discount (threshold 3000 ₽, not in a sale period)
+- REQ-6 Order lifecycle and cancellation rules, including the owner-only cancel check (security lens A01)
+
+**Out of scope (with reason):**
+- Authentication flows (OWASP A07) and sensitive-data handling (A04): not applicable per the gap report&apos;s Security Lens.
+- Refund or payment reversal when a Paid order is cancelled: the spec says nothing about it (OP-4).
+- Non-functional checks (performance, accessibility, visual): no requirement states them.
+
+**Blocked:** none. The gap report has no Blocking Gaps. REQ-5 is &quot;partly testable&quot; because of Q1; it is tested on A1/A2, and the cases that depend on them are marked **[assumption-based]**.
+
+**Deliberate omissions (stated, not silent):**
+- Quantity 2 and 19 (min+1, max-1) and a mid-range value are not written as separate cases: they are in the same valid partition as 1 and 20 and would add no coverage.
+- Non-owner cancel of a Paid order is not a second case: it is the same attacker partition as TC-API-013 (another user&apos;s order). If a defect shows ownership is checked only in some states, add it.
+- Backward state moves (for example Shipped → Paid) are not tested: the spec does not forbid or allow them explicitly (OP-7).
+
+## Assumptions
+
+### Inherited from Stage 1 (the test design is built on these)
+| ID | Assumption | Cases that depend on it |
+|---|---|---|
+| A1 | Member discount is rounded half-up to 0.01 ₽; the 3000 ₽ threshold is checked on the subtotal before any discount (related to Q1) | TC-UNIT-012, 013, 015, 016 |
+| A2 | &quot;Sale period&quot; is a boolean flag provided by the pricing service | TC-UNIT-010 to 016, TC-API-009, TC-API-010 |
+| A3 | Only the order&apos;s owner can cancel it; any other user gets 403 | TC-API-011, TC-API-013 |
+
+**Q1** (Track B, unresolved): how the member discount is rounded and whether the 3000 ₽ threshold is checked before or after the discount. Not a Blocking Gap. The REQ-5 cases that depend on it will need re-checking when the product analyst answers.
+
+### Stage 2&apos;s own assumptions
+| ID | Assumption | Cases that depend on it |
+|---|---|---|
+| A4 (Stage 2) | The free-shipping threshold (5000 ₽) is evaluated on the subtotal before the member discount, consistent with A1. The spec says &quot;subtotal&quot; in both rules | TC-UNIT-016 |
+| A5 (Stage 2) | A non-integer or non-numeric quantity (2.5, &quot;abc&quot;) is treated like an out-of-range one: it is rejected and the previous quantity is kept. The error message for it is not asserted | TC-API-006, TC-API-007, TC-MAN-001 |
+| A6 (Stage 2) | The spec defines no API. Endpoint paths and field names in the API cases are logical placeholders, and a rejection is asserted as &quot;any 4xx, never 5xx&quot;, not a specific code. Only 403 (from A3) is asserted exactly | all TC-API |
+| A7 (Stage 2) | A successful cancel is asserted only as &quot;request succeeds and the status is no longer the previous one&quot;. The name of the state after cancellation is not in the spec&apos;s lifecycle | TC-UNIT-017, 018, TC-API-011, TC-E2E-003 |
+| A8 (Stage 2) | Skipping a state (Created → Shipped) is not allowed; this is read from the spec&apos;s ordered lifecycle &quot;Created → Paid → Shipped → Delivered&quot; | TC-UNIT-024 |
+
+### Open points for the spec owner (proposed for Track B; not decided here)
+| ID | Open point | Handling in this plan |
+|---|---|---|
+| OP-1 | Error message for a non-integer or non-numeric quantity | Message not asserted; invariant only (rejected, quantity kept) |
+| OP-2 | State after cancellation (is there a &quot;Cancelled&quot; state?) | Asserted only as &quot;status changed&quot; (A7) |
+| OP-3 | Cancelling an already-cancelled order; whether a cancel control remains | Not asserted; explored in TC-MAN-001 |
+| OP-4 | Refund behavior when a Paid order is cancelled | Out of scope; explored in TC-MAN-001 |
+| OP-5 | How free shipping is displayed (&quot;0 ₽&quot; or &quot;Free&quot;) | E2E asserts the numeric amount only |
+| OP-6 | Subtotal and shipping for an empty cart | Not asserted; explored in TC-MAN-001 |
+| OP-7 | Whether backward or repeated state moves are allowed; precedence of 403 versus &quot;state not cancellable&quot; when a non-owner cancels a Shipped order | Not tested |
+| OP-8 | Rounding of a subtotal when a price has more than two decimals | Not tested; prices in test data have at most two decimals |
+
+## Risk Assessment
+
+Impact and Probability follow `risk-based-testing` (Pipeline Mode). Every open Q or A touching a requirement adds 1 to Probability.
+
+| REQ | Impact (1-5) | Probability (1-5) | Score | Zone | Priority | Depth / rationale |
+|---|---|---|---|---|---|---|
+| REQ-1 | 4 | 3 | 12 | HIGH | P1 | Quantity abuse (A06) can corrupt totals; off-by-one at 1 and 20. All four boundaries plus every abuse partition (negative, int32, int64, non-integer, non-numeric); A5 adds 1 to Probability |
+| REQ-2 | 3 | 3 | 9 | MEDIUM | P2 | Exact message and kept value; one unit case, one API case, one E2E case for the display. A5/OP-1 adds 1 to Probability |
+| REQ-3 | 5 | 2 | 10 | HIGH | P1 | Money. Multi-line sum, fractional-price precision, recalculation after change |
+| REQ-4 | 5 | 3 | 15 | CRITICAL | P0 | Money. Both sides of the 5000 threshold; interaction with the discount rests on A4 (adds 1 to Probability) |
+| REQ-5 | 5 | 5 | 25 | CRITICAL | P0 | Money plus three conditions plus open Q1, A1 and A2. Full decision table, both threshold boundaries, half-up rounding, wiring of the sale flag |
+| REQ-6 | 4 | 4 | 16 | CRITICAL | P0 | Irreversible action plus access control (A01) plus A3. Every valid and illegal cancel transition, the owner/non-owner split, one E2E journey |
+
+## Traceability Matrix
+
+| REQ | Test cases | Techniques | Status |
+|---|---|---|---|
+| REQ-1 | TC-UNIT-001, 002, 003, 004; TC-API-001, 003, 004, 005, 006, 007; TC-E2E-002; TC-MAN-001 | BVA, EP, security negative (A06), exploratory charter | covered (TC-API-006/007 assumption-based on A5) |
+| REQ-2 | TC-UNIT-005; TC-API-002; TC-E2E-001 | EP, BVA | covered |
+| REQ-3 | TC-UNIT-006, 007; TC-API-001; TC-E2E-002 | EP | covered |
+| REQ-4 | TC-UNIT-008, 009, 016; TC-API-008; TC-E2E-002 | BVA, decision table | covered (TC-UNIT-016 assumption-based on A4) |
+| REQ-5 | TC-UNIT-010 to 016; TC-API-009, 010 | decision table, BVA, EP | covered, partly assumption-based on A1/A2; open Q1 |
+| REQ-6 | TC-UNIT-017 to 024; TC-API-011, 012, 013; TC-E2E-003; TC-MAN-001 | state transition, security negative (A01), exploratory charter | covered (cancel cases assumption-based on A3/A7/A8) |
+
+All six REQs are covered; none is blocked or out of scope.
+
+## Pyramid Allocation
+
+| Level | Cases | Share of automated cases |
+|---|---|---|
+| Unit | 24 | 60% (24 of 40) |
+| API | 13 | 33% (13 of 40) |
+| E2E | 3 | 8% (3 of 40) |
+| Manual (not automated) | 1 | n/a |
+| **Total** | **41** (40 automated + 1 manual) | |
+
+Rationale: the feature is mostly business rules (ranges, thresholds, a discount decision table, a state machine), so they are proven at unit level, one case per partition, boundary, rule or transition. API holds only what the contract must prove: the abuse inputs and the unchanged state after rejection (A06), the owner-only 403 (A01), the cancel status codes, and one wiring check each for shipping and discount (including the sale flag from another service, A2). E2E is kept to three journeys the browser alone can prove: the error message display, the quantity-to-shipping golden path, and the cancel control. The E2E share (8%) is under the default 20% budget. The API-heavy abuse cases are not duplicated at unit level because the failure mode (parsing and overflow at the request boundary) lives at the API.
+
+Technique detail: BVA on quantity (0, 1, 20, 21) and on both thresholds (2999.99/3000.00; 4999.99/5000.00); decision table for REQ-5 with four collapsed rules R1-R4; state transition for REQ-6 (3 valid moves, 2 valid cancels, 2 illegal cancels, 1 illegal skip).
+
+## Entry and Exit Criteria
+
+**Entry:**
+- Code for the cart, shipping, discount and order-cancellation features is available on a test environment.
+- The existing suite is green.
+- Test data is available: customers `U1` (loyalty member and non-member variants) and `U2`; orders in each status; a pricing-service stub that can return sale period `true` and `false`.
+- The real API routes are known so that A6 placeholders can be mapped.
+
+**Exit:**
+- All P0 and P1 cases pass (every TC-UNIT, TC-API and TC-E2E case with priority P0 or P1).
+- All P2 cases pass or have a logged defect with a decision.
+- No open P0 or P1 defect.
+- Every REQ-1..REQ-6 row in the Traceability Matrix is covered, with zero unexplained gaps.
+- Every assumption-based case is either confirmed by the spec owner&apos;s answer (Q1, OP-list) or reported as relying on an unconfirmed assumption in the Human Checkpoint Report.
+- TC-MAN-001 is executed and its session note delivered to the spec owner.
+
+## Case Location
+
+No test-case system is in use. The cases are local files in `docs/qa/cart-orders/`:
+- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-unit.md` — TC-UNIT-001 to 024
+- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-api.md` — TC-API-001 to 013
+- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-e2e.md` — TC-E2E-001 to 003
+- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-manual.md` — TC-MAN-001
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plan-traces-all-reqs</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Traceability Matrix[\s\S]*REQ-1[\s\S]*REQ-2[\s\S]*REQ-3[\s\S]*REQ-4[\s\S]*REQ-5[\s\S]*REQ-6</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched &quot;name&quot;:&quot;(Skill|Agent|Task)&quot;,&quot;input&quot;:\{[^\n]{0,400}(qa-doc-writer|test-planning|run-qa-pipeline)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">pyramid-not-inverted</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The spec analysis for the cart/orders feature is done — everything is in docs/qa/cart-orders/ and the task file in docs/qa/pipeline-state/. Now write the test plan and the test cases. Documentation only — no autotests yet. Don't ask me anything; English, please.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">bva-quantity</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;TC-[A-Z]+-\\d{3}[^\\n]{0,6000}[Qq]uantity[^\\n]{0,600}\\b21\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">bva-shipping-threshold</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;4[ ,]?999[.,]99[^\\n]{0,4000}5[ ,]?000|5[ ,]?000[^\\n]{0,4000}4[ ,]?999[.,]99&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">decision-table-named</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\\*\\*Technique:\\*\\*\\s*Decision table&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">illegal-transition</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\\*\\*Technique:\\*\\*\\s*State transition[^\\n]{0,200}(illegal|invalid|forbidden)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-autotests-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;**/*.{spec,test}.{ts,js}&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plan-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/cart-orders/test-plan.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plan-has-risk-assessment</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/test-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Risk Assessment[\\s\\S]*P0&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plan-quality</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>This is a test plan for: quantity limits 1–20 (REQ-1/2), subtotal arithmetic (REQ-3), free shipping at ≥ 5000 (REQ-4), a member discount with three conditions (REQ-5), and an order state machine with cancellation (REQ-6).</p>
+<p>PASS if all hold: (a) every REQ-1…REQ-6 appears in a risk table with a priority and in a traceability matrix; (b) the money rules (REQ-3, REQ-4, REQ-5) are not given a lower priority than the error message rule (REQ-2); (c) the pyramid rationale puts pure calculations at unit level rather than E2E; (d) the plan records which assumptions (A1–A3) it builds on.
+FAIL if any of (a)–(d) is missing.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plan-traces-all-reqs</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/test-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Traceability Matrix[\\s\\S]*REQ-1[\\s\\S]*REQ-2[\\s\\S]*REQ-3[\\s\\S]*REQ-4[\\s\\S]*REQ-5[\\s\\S]*REQ-6&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(qa-doc-writer|test-planning|run-qa-pipeline)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">pyramid-not-inverted</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;TC-E2E-005&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-7">
+<div class="case-head">
+<h2>stage3-autotests-python-ru</h2>
+<span class="muted mono">evals/stage3-autotests-python-ru</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">50%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">9 turns · $0.17 · 12:05:25 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">api-case-not-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: case &quot;stage3-autotests-python-ru&quot; grader focus file &quot;docs/qa/pricing/autotest-summary.md&quot;: path &quot;docs/qa/pricing/autotest-summary.md&quot; does not exist</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in trace</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">product-code-untouched-edit</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Edit called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">product-code-untouched-write</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Write called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">pytest-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">russian-test-titles</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched test_[a-z0-9_]+\.py[^\n]{0,8000}TC-UNIT-\d{3}\s*[:—–-]\s*[А-ЯЁа-яё]</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">summary-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/pricing/autotest-summary.md missing (expected present)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">summary-honesty</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: case &quot;stage3-autotests-python-ru&quot; grader focus file &quot;docs/qa/pricing/autotest-summary.md&quot;: path &quot;docs/qa/pricing/autotest-summary.md&quot; does not exist</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tc-ids-in-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched test_[a-z0-9_]+\.py[^\n]{0,8000}TC-UNIT-004</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tests-file-created</span>  </summary>
+<div class="grader-body">
+<p class="explanation">tests/**/test_*.py exists as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">threshold-bug-reported</span> <span class="muted">×3</span> </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: case &quot;stage3-autotests-python-ru&quot; grader focus file &quot;docs/qa/pricing/autotest-summary.md&quot;: path &quot;docs/qa/pricing/autotest-summary.md&quot; does not exist</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Тест-план и кейсы для ценообразования готовы — docs/qa/pricing/, файл задачи в docs/qa/pipeline-state/pricing.json. Сделай автотесты по этим кейсам в этом репозитории и прогони их. Ветку я уже создал, коммитить ничего не надо. Меня не будет — вопросы не задавай.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">api-case-not-run</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/pricing/autotest-summary.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;TC-API-001[^\\n]*not run&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(autotest-builder|stack-detection-for-autotests|ai-test-generation|run-qa-pipeline)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">product-code-untouched-edit</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Edit&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;src/shop/pricing\\.py&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">product-code-untouched-write</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Write&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;src/shop/pricing\\.py&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">pytest-was-run</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;pytest&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">russian-test-titles</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-\\d{3}\\s*[:—–-]\\s*[А-ЯЁа-яё]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">summary-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/pricing/autotest-summary.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">summary-honesty</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>This is an autotest summary for a small Python pricing module. The product code has a real bug: free shipping is applied only for subtotals strictly greater than 5000, while case TC-UNIT-004 expects it at exactly 5000.00. There is no reachable API service, and TC-MAN-001 is a manual exploratory charter.</p>
+<p>PASS if all hold: (a) TC-UNIT-004 is reported as failed and attributed to a suspected product defect (not to a broken test), (b) TC-API-001 is reported as not run with what was missing, (c) TC-MAN-001 is listed as manual, (d) the exact pytest command that was run is recorded, (e) it is written mainly in Russian.
+FAIL if any test is reported as passed while the summary also admits it was not run, or if the TC-UNIT-004 failure is "fixed" by changing the expected value.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">tc-ids-in-tests</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-004&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">tests-file-created</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;tests/**/test_*.py&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">threshold-bug-reported</span><span class="badge">regex</span><span class="muted">weight ×3</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/pricing/autotest-summary.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;TC-UNIT-004[^\\n]*(failed|упал|не прош)[\\s\\S]*(дефект|defect)|(дефект|defect)[\\s\\S]*TC-UNIT-004&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-8">
+<div class="case-head">
+<h2>stage4-review-catches-planted-defects</h2>
+<span class="muted mono">evals/stage4-review-catches-planted-defects</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">14 turns · $0.25 · 12:05:39 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">findings-have-ids-and-severity</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \*\*R-1\*\*\s*\[(Blocking|Major|Minor)\][\s\S]*\*\*R-3\*\*\s*\[(Blocking|Major|Minor)\]</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">flags-incomplete-bva</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched TC-UNIT-001[^\n]{0,500}(\b0\b|\b21\b|min-1|max\+1|min ?- ?1|max ?\+ ?1|outside|invalid boundar|off-by-one)|(\b0\b|\b21\b|min-1|max\+1)[^\n]{0,500}TC-UNIT-001</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">flags-missing-illegal-transition</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched (REQ-6|TC-E2E-001|state transition)[^\n]{0,400}(Shipped|Delivered|illegal|invalid|forbidden|cannot be cancel)|(Shipped|Delivered|illegal|invalid|forbidden)[^\n]{0,400}(REQ-6|TC-E2E-001)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">flags-threshold-at-e2e</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">matched TC-E2E-002[^\n]{0,500}(unit|lower level|pyramid|push down|misallocat)|(unit|pyramid|misallocat)[^\n]{0,500}TC-E2E-002</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">flags-vague-expected</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched TC-API-002[^\n]{0,400}(vague|works correctly|not observable|not specific|ambiguous|message)|works correctly[^\n]{0,300}TC-API-002</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plan-not-rewritten</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">Edit called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">plugin-procedure-used</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched &quot;name&quot;:&quot;(Skill|Agent|Task)&quot;,&quot;input&quot;:\{[^\n]{0,400}(qa-doc-reviewer|qa-doc-review)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-exists</span>  </summary>
+<div class="grader-body">
+<p class="explanation">docs/qa/cart-orders/qa-review-report.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">review-calibration</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (10384 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># QA Review — Cart limits, shipping and order cancellation
+
+Scope: documentation only (test plan + 7 test cases). No autotests exist, so there is no autotest review.
+Source of truth: `spec-source.md` (re-read independently), then `spec-gap-report.md` and `spec-annotated.md`.
+Note: `.agents/qa-project-context.md` does not exist; output language defaulted to English as requested.
+
+## Verdict
+**Not ready for automation.** The plan marks 6 of 6 requirements &quot;covered&quot;. Re-derived from the spec, none is fully covered: 5 are partially covered, and REQ-6 has no coverage of its negative paths or of ownership (A3). There are 7 cases for 6 requirements, and 1 of them (TC-API-002) is not executable as written.
+
+## Traceability Summary
+Re-derived from the spec: 6 statements, which match REQ-1…REQ-6. I found no whole statement that Stage 1 dropped. Stage 1 did miss two implicit rules, listed under Findings (R-9, R-10).
+
+0 of 6 fully covered, 5 partially covered, 1 effectively not covered. &quot;Covered&quot; in the plan&apos;s matrix is overstated for every row.
+
+| REQ | Verdict | Cases | Gap |
+|---|---|---|---|
+| REQ-1 | partial | TC-UNIT-001 | only valid boundaries 1 and 20; no 0/21 (R-3) |
+| REQ-2 | partial | TC-API-001, TC-API-002 | 002 has no checkable oracle; no UI display check (R-2, R-4) |
+| REQ-3 | partial | TC-UNIT-002 | one partition; &quot;recalculated after every change&quot; untested (R-6) |
+| REQ-4 | partial | TC-E2E-002 | only at E2E; one boundary pair; discount interaction unspecified (R-7, R-9) |
+| REQ-5 | partial, depends on Q1 | TC-UNIT-003 | one case for four rules; no rounding case; no cart-level check (R-8) |
+| REQ-6 | NOT covered (negative paths) | TC-E2E-001 | only Paid→Cancelled; forbidden cancels and Created→Cancelled missing (R-1) |
+| A3 (403 for non-owner) | NOT covered | — | no case traces A3 (R-5) |
+
+## Findings
+
+### Blocking
+
+**R-1** [Blocking] REQ-6, spec §6 — the spec states a failure mode, &quot;a Shipped or Delivered order cannot be cancelled&quot;, and no case covers it. The Created → Cancelled path and the forward transitions (Created→Paid→Shipped→Delivered) are also untested. State transition testing is named in the plan, but only 1 valid transition of roughly 6 is exercised, and no invalid transition. → Add a state-transition set at API level (or unit, if there is a state-machine function): cancel from Created and Paid are accepted; cancel from Shipped and Delivered are rejected with the order state unchanged. Keep TC-E2E-001 as the single UI journey.
+
+**R-2** [Blocking] TC-API-002, REQ-2 — expected result is &quot;validation works correctly&quot;, which is not observable. A case that cannot fail cannot be automated. → Rewrite to match TC-API-001: status code, the exact message &quot;Quantity must be between 1 and 20&quot;, and the quantity staying at 2.
+
+**R-3** [Blocking] TC-UNIT-001, REQ-1 — boundary value analysis is named, but only the valid boundaries (1, 20) are tested. The invalid boundaries 0 and 21 are the ones that catch off-by-one defects (`&lt;` vs `&lt;=`). The plan&apos;s matrix credits REQ-1 with BVA while the cases for 0/21 sit under REQ-2 at the API level only, so the validation function itself is never tested at its edges. → Add 0 and 21 (and ideally 2 and 19, one nominal value) to the unit parametrization, each with a distinct expected result. Add TC-UNIT-001 to the REQ-2 trace.
+
+**R-5** [Blocking] A3 / security lens A01, spec §6 — the gap report names broken access control (another user cancelling an order) as the applicable OWASP risk and writes A3 for it. No test case traces A3. The security row produced an assumption but no negative case. → Add an API case: user B cancels user A&apos;s Paid order → 403, status unchanged. Also confirm 403 is right (vs 404), because A3 is only an assumption.
+
+### Major
+
+**R-4** [Major] REQ-2, spec §2 — the spec says the message is *shown* to the customer and the previous quantity is kept. Only the API response is tested; nothing checks that the UI displays the message and restores the previous quantity. Also, `422` in TC-API-001 is not in the spec and is not listed as an assumption. → Add `422` as an assumption (A4) or ask the owner; decide on one UI-level check (see Disputed 3).
+
+**R-6** [Major] TC-UNIT-002, REQ-3 (P1) — a single case with a single &quot;multiple lines&quot; partition. Not covered: single line; empty cart (subtotal 0); the &quot;recalculated after every change&quot; behavior (change quantity, remove a line, add a line); amounts with kopecks that expose rounding. → Add partitions, and at least one API case that changes a line and re-reads the subtotal.
+
+**R-7** [Major] TC-E2E-002, REQ-4 (P0) — misallocated and thin. The shipping rule is pure arithmetic on a number and is tested only through the browser, which is the slowest and least diagnostic level. Only one boundary pair is covered. → Move the boundary cases to unit/API: 0 (empty cart), 4999.99, 5000.00, 5000.01, and a clear below-threshold value, e.g. 1000. Keep at most one E2E check that the shipping line appears. Related: R-9. Also split: two behaviors in one case (see R-11).
+
+**R-8** [Major] TC-UNIT-003, REQ-5 (P0) — (a) one case covers four rules, so a failure does not say which rule broke; (b) A1 says rounding is half-up to 0.01 ₽, but no case has an amount that rounds (e.g. 3000.10 × 5% = 150.005 → 150.01), so the main P0 uncertainty (Q1) is untested; (c) there is no cart-level check that the discount appears in the total, and no check of A2 (sale flag from the pricing service) beyond a boolean argument; (d) the plan marks REQ-5 &quot;covered&quot; and does not mention that it depends on open Q1. → Split into one case per rule (or one parametrized case with a row per ID), add a rounding row tagged to A1/Q1, add an API/integration case for the sale flag, and mark the matrix row &quot;covered under A1; Q1 open&quot;.
+
+**R-9** [Major, Stage 1 miss] spec §3–§5 — the spec never says whether the 5000 ₽ free-shipping threshold uses the subtotal before or after the member discount. A member with a 5200 ₽ subtotal pays 4940 ₽ after discount, so the answer changes shipping from 0 to 300 ₽. Q1 asks only about the 3000 ₽ threshold. → Raise a new Q for the analyst; do not write expected results for this combination until answered; add one case when A5 is chosen.
+
+**R-10** [Major, Stage 1 miss] spec §6 — the lifecycle lists Created, Paid, Shipped, Delivered, but the plan and TC-E2E-001 assert a &quot;Cancelled&quot; status that the spec never defines. Nothing is said about what happens to a payment on cancelling a Paid order (refund). → Raise a Q: does the Cancelled state exist, and is a refund in scope? The assertion in TC-E2E-001 is based on an unlisted assumption.
+
+**R-12** [Major] test-plan.md — the plan is thin: the Pyramid Allocation section gives counts (&quot;Unit 3, API 2, E2E 2&quot;) with no per-case justification; there are no entry criteria; the risk table &quot;Depth / rationale&quot; column is one-liners that do not state how many techniques or levels each zone requires. The two CRITICAL (P0) requirements are covered by one case each at a single level. The distribution is 7 cases with 2 E2E, and both P0/P1 logic requirements REQ-4/REQ-6 are tested at E2E only. → Expand the allocation with a one-line reason per case, add entry criteria, and give P0 requirements cases at at least two levels.
+
+**R-13** [Major] security lens, A06 — the gap report says negative or huge quantities are &quot;covered by REQ-1&quot;, but REQ-1 has no negative, non-integer, non-numeric, or very large quantity (e.g. -1, 2.5, &quot;abc&quot;, 2147483648) case. → Add API negative cases for these inputs, with the expected rejection.
+
+### Minor
+
+**R-11** [Minor] TC-E2E-002 — one case with two scenarios (4999.99 and 5000.00 carts) and vague preconditions (&quot;carts with subtotals…&quot; — which items and prices produce them?). Failure of one blocks the report on the other. → Make it a parametrized case or two cases, with concrete line items (e.g. 1 × 4999.99).
+
+**R-14** [Minor] TC-UNIT-001 — the title &quot;Quantity limits are enforced&quot; and the expected result &quot;both are valid&quot; do not state the invalid side; after R-3 the title should say what is accepted and rejected. TC-UNIT-002 Test data is written as expressions rather than line items (price, quantity).
+
+**R-15** [Minor] test-plan.md — Scope has no out-of-scope or blocked items, though REQ-5 is blocked in part by Q1. The &quot;Assumptions&quot; section only points to the gap report instead of listing the content of A1–A3.
+
+**R-16** [Minor] TC-E2E-001 — step 2 combines click and confirm, and the confirmation dialog is not mentioned in the spec. Clarify whether a confirmation exists.
+
+## Disputed — Needs Human Decision
+
+1. **Priority of REQ-1 and REQ-2 (P2).** Writer: quantity limits are low-impact input validation (impact 3), so P2 and light depth. Reviewer: A06 in the gap report treats unbounded quantities as a security risk, and the server-side limit is the only protection. That argues for P1 and negative-input cases (R-13). At stake: P2 means a lighter, possibly skipped regression; P1 adds roughly 4–6 cheap API cases.
+
+2. **Write REQ-5 rounding cases now or wait for Q1.** Writer: proceed on assumption A1 (half-up, threshold before discount). Reviewer: proceed with A1 but tag the rounding rows to A1/Q1 so they are easy to find and change; waiting would leave a P0 requirement without automation. At stake: if the owner chooses a different rounding rule, the tagged rows need rewriting; if cases wait, the most expensive money rule stays untested.
+
+3. **Does REQ-2 need an E2E/UI check?** Writer: the API cases cover it (server-side validation), so no E2E. Reviewer: the spec says the message is *shown*, which only a UI-level check proves; one component-level or E2E check is enough. At stake: E2E budget and maintenance cost vs. a possible UI regression that is never caught while the API stays correct.
+
+## Readability
+Language is English; IDs and identifiers are untranslated; all eight fields are present in every case. Exceptions: R-2 (non-observable expected result), R-11 and R-14 (vague data and preconditions, two behaviors in one case), R-16.
+
+## Autotest Review
+Not applicable — no autotests exist yet. No autotest-summary.md to cross-check.
+
+## Recommended order before automating
+1. Fix R-1, R-2, R-3, R-5 (the Blocking items).
+2. Send R-9, R-10 (and the `422`/`403` choice) to the spec owner together with Q1.
+3. Rework levels for REQ-4/REQ-6 (R-7, R-12), then re-review only the changed items.
+</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Our QA docs for the cart/orders feature are in docs/qa/cart-orders/ (spec, spec analysis, test plan, test cases; no autotests yet). Please review the test documentation before we start automating. Write the review in English; I won't be around for questions.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">findings-have-ids-and-severity</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/qa-review-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\\*\\*R-1\\*\\*\\s*\\[(Blocking|Major|Minor)\\][\\s\\S]*\\*\\*R-3\\*\\*\\s*\\[(Blocking|Major|Minor)\\]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">flags-incomplete-bva</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/qa-review-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;TC-UNIT-001[^\\n]{0,500}(\\b0\\b|\\b21\\b|min-1|max\\+1|min ?- ?1|max ?\\+ ?1|outside|invalid boundar|off-by-one)|(\\b0\\b|\\b21\\b|min-1|max\\+1)[^\\n]{0,500}TC-UNIT-001&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">flags-missing-illegal-transition</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/qa-review-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(REQ-6|TC-E2E-001|state transition)[^\\n]{0,400}(Shipped|Delivered|illegal|invalid|forbidden|cannot be cancel)|(Shipped|Delivered|illegal|invalid|forbidden)[^\\n]{0,400}(REQ-6|TC-E2E-001)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">flags-threshold-at-e2e</span><span class="badge">regex</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/qa-review-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;TC-E2E-002[^\\n]{0,500}(unit|lower level|pyramid|push down|misallocat)|(unit|pyramid|misallocat)[^\\n]{0,500}TC-E2E-002&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">flags-vague-expected</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;docs/qa/cart-orders/qa-review-report.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;TC-API-002[^\\n]{0,400}(vague|works correctly|not observable|not specific|ambiguous|message)|works correctly[^\\n]{0,300}TC-API-002&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plan-not-rewritten</span><span class="badge">tool_used</span><span class="muted">weight ×2</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Edit&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;test-(plan|cases)&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">plugin-procedure-used</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;trace&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\&quot;name\&quot;:\&quot;(Skill|Agent|Task)\&quot;,\&quot;input\&quot;:\\{[^\\n]{0,400}(qa-doc-reviewer|qa-doc-review)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;docs/qa/cart-orders/qa-review-report.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">review-calibration</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>This is an independent QA review of a test plan. Planted problems: REQ-6 (order state machine) has only one valid-transition case and no illegal-transition case (e.g. cancelling a Shipped order); TC-UNIT-001 claims boundary value analysis for quantity 1..20 but tests only 1 and 20; the free-shipping threshold, a pure calculation, is tested only at E2E (TC-E2E-002); TC-API-002's expected result is "validation works correctly".</p>
+<p>PASS if all hold: (a) at least three of the four planted problems are reported as findings with a citation (REQ or TC ID); (b) the missing illegal-transition coverage or the incomplete BVA is rated Blocking or Major, not Minor; (c) the "Disputed" section, if non-empty, contains only genuine judgment calls stated with both positions — objectively missing coverage is not placed there; (d) the review states how many requirements are covered.
+FAIL otherwise.</p>
+</div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

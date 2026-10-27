@@ -1,0 +1,62 @@
+# Planted defects in resources/spec.md. A defect counts as found when one finding
+# (a Q/A entry, an inventory row, or a security-lens line) of spec-gap-report.md matches
+# every pattern group listed under `all_of` (each group is a regex alternation,
+# case-insensitive). Used by tools/score_spec_analysis.py; graders mirror the key ones.
+spec: resources/spec.md
+language: en
+defects:
+  - id: D1
+    kind: contradiction
+    where: "§2.3 vs §5.2"
+    what: "Usable through the expiry date (§2.3) vs stops working at the start of it (§5.2)"
+    all_of:
+      - "expir"
+      - "5\\.2|start of (its|the) expiry|stop(s)? working"
+      - "2\\.3|including|contradict|conflict"
+  - id: D2
+    kind: boundary ambiguity
+    where: "§2.6"
+    what: "'over 3000' — is exactly 3000 eligible (> vs >=)? before or after discount?"
+    all_of:
+      - "3\\s?000"
+      - "exactly|>=|≥|inclusive|at least|over|boundary|equal"
+  - id: D3
+    kind: untestable NFR
+    where: "§3.6"
+    what: "'Validation must be fast' has no measurable criterion"
+    all_of:
+      - "fast"
+      - "measur|threshold|ms|millisecond|second|latency|response time|no (numeric|measurable)|untestable|not testable"
+  - id: D4
+    kind: missing error path
+    where: "§3"
+    what: "No message/behaviour for a non-existent, malformed, deactivated-shown, or below-minimum code"
+    all_of:
+      - "not exist|non-existent|nonexistent|unknown code|invalid code|malformed|wrong format|below the minimum|under 3\\s?000|minimum order"
+      - "message|error|behaviou?r|what happens"
+  - id: D5
+    kind: terminology
+    where: "§3.5"
+    what: "'Coupons' and 'vouchers' are undefined — are they promo codes? gift cards are out of scope"
+    all_of:
+      - "coupon|voucher"
+      - "defin|term|same as|mean|glossary|undefined|inconsisten"
+  - id: D6
+    kind: security (A07 brute force)
+    where: "§3 (silent)"
+    what: "No limit on code attempts — codes can be enumerated by brute force"
+    all_of:
+      - "brute|enumerat|guess(ing)? (valid )?codes|rate.?limit|throttl|(number|limit) of (attempts|tries|guesses)|attempts? (limit|per)|lock(ed)? out after"
+  - id: D7
+    kind: concurrency / abuse (A06)
+    where: "§2.5"
+    what: "Single-use code applied in two carts/sessions at the same time — which order wins?"
+    all_of:
+      - "single-use|single use|one-time"
+      - "concurren|simultaneous|same time|two (orders|carts|sessions|customers|users)|race|parallel"
+  - id: D8
+    kind: missing rule
+    where: "§2.4"
+    what: "Rounding of percentage discounts and fixed discount larger than the subtotal are unspecified"
+    all_of:
+      - "round|kopeck|kopek|decimal|fraction|exceed|greater than the (sub)?total|negative total|more than the"

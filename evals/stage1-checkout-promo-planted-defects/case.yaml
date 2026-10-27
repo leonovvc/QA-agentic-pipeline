@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: stage1-checkout-promo-planted-defects
+context:
+  scaffold_script: scaffold.sh

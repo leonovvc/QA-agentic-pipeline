@@ -1,0 +1,36 @@
+{
+  "case": "stage1-checkout-promo-planted-defects",
+  "artifacts": [
+    "docs/qa/checkout-promo/spec-annotated.md",
+    "docs/qa/checkout-promo/spec-gap-report.md",
+    "docs/qa/checkout-promo/spec-source.md"
+  ],
+  "tool_calls": {
+    "Skill": 1,
+    "Bash": 1,
+    "Read": 2,
+    "Write": 3,
+    "Edit": 1
+  },
+  "task_dirs": {
+    "checkout-promo": {
+      "contract_checks_total": 14,
+      "contract_checks_failed": 1,
+      "failed_checks": [
+        "[stage 1] every A in the report has an inline marker (missing markers: A1, A10, A11, A12, A13, A14, A15, A16, A17, A2, A20, A3, A4, A5, A6, A7, A8, A9)"
+      ],
+      "spec_defect_recall": {
+        "planted": 8,
+        "found": 8,
+        "recall": 1.0,
+        "missed": [],
+        "requirements_inventoried": 23,
+        "questions_raised": 28
+      }
+    }
+  },
+  "agents_dispatched": [],
+  "skills_invoked": [
+    "qa-agentic-pipeline:spec-gap-analysis"
+  ]
+}

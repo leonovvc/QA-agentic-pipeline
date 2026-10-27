@@ -1,0 +1,20 @@
+{
+  "task_id": "cart-quantity-limits-1a2b3c",
+  "title": "Cart quantity limits",
+  "source": {"type": "text", "value": "pasted"},
+  "target_repo": ".",
+  "output_language": "en",
+  "docs_dir": "docs/qa/cart-quantity-limits-1a2b3c",
+  "status": "IN_REVIEW",
+  "created_at": "2026-10-27T10:00:00Z",
+  "updated_at": "2026-10-27T10:40:00Z",
+  "stages": [
+    {"stage": 1, "agent": "spec-analyst", "status": "done", "started_at": "2026-10-27T10:00:00Z", "completed_at": "2026-10-27T10:05:00Z", "output": ["spec-source.md", "spec-gap-report.md", "spec-annotated.md"]},
+    {"stage": 2, "agent": "qa-doc-writer", "status": "done", "started_at": "2026-10-27T10:05:00Z", "completed_at": "2026-10-27T10:15:00Z", "output": ["test-plan.md", "test-cases-unit.md", "test-cases-api.md", "test-cases-e2e.md"]},
+    {"stage": 3, "agent": "autotest-builder", "status": "done", "started_at": "2026-10-27T10:15:00Z", "completed_at": "2026-10-27T10:30:00Z", "output": "autotest-summary.md"},
+    {"stage": 4, "agent": "qa-doc-reviewer", "status": "done", "started_at": "2026-10-27T10:30:00Z", "completed_at": "2026-10-27T10:40:00Z", "output": "qa-review-report.md"}
+  ],
+  "assumptions_log": ["A1", "A2"],
+  "disputed_items": [],
+  "history": [{"at": "2026-10-27T10:00:00Z", "event": "task_created"}]
+}

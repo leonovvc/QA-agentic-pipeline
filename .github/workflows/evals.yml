@@ -1,0 +1,59 @@
+name: Behavioral evals
+
+# Runs the plugin's eval suite with real model calls. Manual only: it needs an
+# ANTHROPIC_API_KEY repository secret and costs money (see docs/evals.md for typical cost).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Run only cases with this tag (stage1, stage2, stage3, stage4, orchestration, routing). Empty = all."
+        required: false
+        default: ""
+      runs:
+        description: "Runs per case per arm"
+        required: false
+        default: "1"
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Claude Code, sandbox prerequisites, and tooling
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          sudo apt-get update && sudo apt-get install -y bubblewrap socat
+          pip install pyyaml pytest
+      - name: Run eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          TAG_ARGS=""
+          if [ -n "${{ inputs.tag }}" ]; then TAG_ARGS="--tag ${{ inputs.tag }}"; fi
+          claude plugin eval . $TAG_ARGS \
+            --trust-plugin \
+            --scaffold \
+            --allow-tools Write Edit "Bash(python3 *)" "Bash(python *)" "Bash(pytest *)" "Bash(mkdir *)" "Bash(date *)" "Bash(ls *)" \
+            --runs ${{ inputs.runs }} \
+            --ablation none \
+            --threshold 0.8 \
+            --model claude-sonnet-5-5 \
+            --judge-model claude-sonnet-5-5 \
+            --no-publish \
+            --keep-temp \
+            --json evals-result.json \
+            --max-cost-usd 40
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: |
+            evals-result.json
+            evals/results/

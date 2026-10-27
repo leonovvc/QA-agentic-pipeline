@@ -1,0 +1,35 @@
+{
+  "case": "stage4-review-catches-planted-defects",
+  "artifacts": [
+    "docs/qa/cart-orders/qa-review-report.md",
+    "docs/qa/cart-orders/spec-annotated.md",
+    "docs/qa/cart-orders/spec-gap-report.md",
+    "docs/qa/cart-orders/spec-source.md",
+    "docs/qa/cart-orders/test-cases-api.md",
+    "docs/qa/cart-orders/test-cases-e2e.md",
+    "docs/qa/cart-orders/test-cases-unit.md",
+    "docs/qa/cart-orders/test-plan.md"
+  ],
+  "tool_calls": {
+    "Skill": 1,
+    "Glob": 1,
+    "Read": 7,
+    "Bash": 1,
+    "Write": 1,
+    "Edit": 1
+  },
+  "task_dirs": {
+    "cart-orders": {
+      "contract_checks_total": 45,
+      "contract_checks_failed": 2,
+      "failed_checks": [
+        "[stage 2] no vague expected results ('works correctly', 'всё работает', …) (TC-API-002)",
+        "[stage 4] every finding carries a severity tag (R-9, R-10)"
+      ]
+    }
+  },
+  "agents_dispatched": [],
+  "skills_invoked": [
+    "qa-agentic-pipeline:qa-doc-review"
+  ]
+}

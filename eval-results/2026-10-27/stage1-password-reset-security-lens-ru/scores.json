@@ -1,0 +1,34 @@
+{
+  "case": "stage1-password-reset-security-lens-ru",
+  "artifacts": [
+    "docs/qa/password-reset/spec-annotated.md",
+    "docs/qa/password-reset/spec-gap-report.md",
+    "docs/qa/password-reset/spec-source.md"
+  ],
+  "tool_calls": {
+    "Skill": 1,
+    "Bash": 2,
+    "Read": 2,
+    "Write": 3,
+    "Edit": 5
+  },
+  "task_dirs": {
+    "password-reset": {
+      "contract_checks_total": 14,
+      "contract_checks_failed": 0,
+      "failed_checks": [],
+      "spec_defect_recall": {
+        "planted": 6,
+        "found": 6,
+        "recall": 1.0,
+        "missed": [],
+        "requirements_inventoried": 13,
+        "questions_raised": 22
+      }
+    }
+  },
+  "agents_dispatched": [],
+  "skills_invoked": [
+    "qa-agentic-pipeline:spec-gap-analysis"
+  ]
+}

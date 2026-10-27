@@ -1,0 +1,1665 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.311",
+  "startedAt": "2026-10-27T12:01:02.957Z",
+  "durationSeconds": 452,
+  "costUsd": 3.2901711,
+  "partial": false,
+  "suite": {
+    "root": "/home/claude/qa-agentic-pipeline",
+    "ablation": "none",
+    "threshold": 0.8,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "qa-agentic-pipeline",
+        "version": "1.0.0",
+        "path": "/home/claude/qa-agentic-pipeline"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "orchestration-blocks-on-empty-spec",
+      "dir": "evals/orchestration-blocks-on-empty-spec",
+      "source": "mixed",
+      "promptMarkdown": "Run the QA pipeline on specs/loyalty.md. I'm stepping away — don't wait for me; write everything in English.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "explains-the-block",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user asked to run a QA pipeline on a marketing-style \"spec\" that contains no checkable requirement (no behaviours, inputs, rules, or acceptance criteria — only aspirations like \"delightful\" and \"stronger KPIs\").\n\nPASS if the final reply says the pipeline stopped (blocked) because no testable requirement could be derived, and asks for — or lists — what the spec owner needs to provide before test design can start.\nFAIL if the reply presents a test plan or test cases, or claims the pipeline completed normally.",
+          "config": {
+            "criteria": "The user asked to run a QA pipeline on a marketing-style \"spec\" that contains no checkable requirement (no behaviours, inputs, rules, or acceptance criteria — only aspirations like \"delightful\" and \"stronger KPIs\").\n\nPASS if the final reply says the pipeline stopped (blocked) because no testable requirement could be derived, and asks for — or lists — what the spec owner needs to provide before test design can start.\nFAIL if the reply presents a test plan or test cases, or claims the pipeline completed normally.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "gap-report-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/**/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "no-test-cases",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/test-cases-*.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "no-test-plan",
+          "type": "file_exists",
+          "weight": 2,
+          "config": {
+            "path": "**/test-plan.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "state-blocked",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "pipeline-state[^\\n]{0,4000}BLOCKED",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 14,
+            "costUsd": 0.4388985999999999,
+            "judgeCostUsd": 0.00031259999999999995,
+            "durationSeconds": 140,
+            "startedAt": "2026-10-27T12:01:03.085Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-mLAjME/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "explains-the-block",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "The QA pipeline stopped at Stage 1 and didn't run Stages 2–4, because `specs/loyalty.md` contains nothing testable. It's three paragraphs of vision statement: no user actions, rules, values, channels or metrics. Stage 1 found 0 requirements and scored testability 1/5. Test cases or autotests built from it would have been invented, so I marked the task `BLOCKED`.\n\nStage 1 raised five blocking gaps:\n- **Q1:** The spec has no functional requirement at all.\n- **Q2:** \"All channels\" is never listed.\n- **Q3:** There is no baseline for what is new versus the current loyalty behavior.\n- **Q4:** \"Modern, intuitive and fun\" has no checkable criterion.\n- **Q5:** \"Stronger KPIs\" names no metric or target.\n\nIt also wrote nine questions for the spec owner (Q7–Q15). They cover points, redemption and balances, access and personal data, channels, features, the behavior being replaced, UX criteria, KPIs and non-functional needs. Q15 asks whether a fuller spec exists, which is the quickest way to unblock.\n\nI made no assumptions about the requirements themselves. The only assumptions were procedural: stop after Stage 1 because you're away, write in English, and use a generic security checklist because the spec says nothing.\n\nNothing is waiting on a decision from you, apart from whether you'd rather force the pipeline on with invented assumptions, which I don't recommend.\n\nTo continue, send the questions to the spec owner and re-run the pipeline once there's a testable spec. Stage 1 will restart because the task is blocked.\n\nThe pipeline's progress file, board and checkpoint report are written. The shell was read-only for my first attempt at those, so I wrote them with the file tool instead. Everything is in `docs/qa/` (the files below are in `next-gen-loyalty-experience-d4a1cd/`):\n- `spec-gap-report.md`\n- `spec-annotated.md`\n- `spec-source.md`\n- `checkpoint.md`\n- `pipeline-state/next-gen-loyalty-experience-d4a1cd.json`\n- `pipeline-state/board.md`"
+              },
+              {
+                "name": "gap-report-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/**/spec-gap-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-test-cases",
+                "passed": true,
+                "weight": 1,
+                "explanation": "**/test-cases-*.md absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-test-plan",
+                "passed": true,
+                "weight": 2,
+                "explanation": "**/test-plan.md absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(run-qa-pipeline)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "state-blocked",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched pipeline-state[^\\n]{0,4000}BLOCKED",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "orchestration-resume-interrupted-stage3",
+      "dir": "evals/orchestration-resume-interrupted-stage3",
+      "source": "mixed",
+      "promptMarkdown": "Вчера сессия оборвалась посреди QA-пайплайна по задаче pricing. Продолжи пайплайн. Меня не будет до вечера — вопросы не задавай.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 3000,
+      "maxTurns": 150,
+      "graders": [
+        {
+          "name": "checkpoint-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/checkpoint.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "earlier-stages-not-edited",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "(spec-gap-report|spec-annotated|test-plan|test-cases-[a-z]+)\\.md",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "earlier-stages-not-rewritten",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Write",
+            "input_match": "(spec-gap-report|spec-annotated|test-plan|test-cases-[a-z]+)\\.md",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "reaches-in-review",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "pipeline-state[^\\n]{0,4000}IN_REVIEW",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "resume-reported",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user asked (in Russian) to resume a QA pipeline whose task file showed stages 1-2 done and stage 3 interrupted.\n\nPASS if the final reply makes clear the run resumed from stage 3 (not from scratch), and presents a checkpoint-style summary that includes a section for disputed items needing the user's decision (or explicitly says there are none). Russian or English wording are both acceptable.\nFAIL if the reply says it started the pipeline over from stage 1, or gives no checkpoint summary.",
+          "config": {
+            "criteria": "The user asked (in Russian) to resume a QA pipeline whose task file showed stages 1-2 done and stage 3 interrupted.\n\nPASS if the final reply makes clear the run resumed from stage 3 (not from scratch), and presents a checkpoint-style summary that includes a section for disputed items needing the user's decision (or explicitly says there are none). Russian or English wording are both acceptable.\nFAIL if the reply says it started the pipeline over from stage 1, or gives no checkpoint summary.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "stage3-redone",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/autotest-summary.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "stage4-done",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/qa-review-report.md",
+            "exists": true
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.7777777777777778,
+            "passed": false,
+            "turns": 26,
+            "costUsd": 0.8221005999999998,
+            "judgeCostUsd": 0.0008614,
+            "durationSeconds": 276,
+            "startedAt": "2026-10-27T12:01:03.086Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-TXYcv6/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "checkpoint-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/pricing/checkpoint.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "earlier-stages-not-edited",
+                "passed": true,
+                "weight": 2,
+                "explanation": "Edit called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "earlier-stages-not-rewritten",
+                "passed": false,
+                "weight": 2,
+                "explanation": "Write called 3x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reaches-in-review",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched pipeline-state[^\\n]{0,4000}IN_REVIEW",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resume-reported",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Пайплайн по задаче `pricing` дошёл до конца и ждёт вашего решения. Статус задачи — `IN_REVIEW`. Все четыре этапа выполнены, в том числе перезапущенный этап 3.\n\n**Что я сделал**\n- **Этап 3:** вчера он оборвался на середине, поэтому я перезапустил его целиком. Автотесты теперь лежат в `tests/test_pricing.py`.\n- **Этап 4:** ревью записано в `docs/qa/pricing/qa-review-report.md`. Итоговый отчёт для вас — `docs/qa/pricing/checkpoint.md`.\n- **Статус и доска:** файл состояния и `board.md` обновил вручную.\n\n**Результат прогона:** 12 passed, 1 failed, 1 skipped.\n- **Упавший тест:** `TC-UNIT-004` нашёл дефект в коде. `shipping_cost` в `src/shop/pricing.py:33` сравнивает через `>`. При сумме ровно 5000,00 доставка стоит 300,00, а в ТЗ написано «от 5000 ₽», то есть бесплатно. Код продукта я не менял.\n- **Пропущенный тест:** `TC-API-001` пропущен, потому что не задан `CART_API_URL` и сервиса корзины в репозитории нет.\n\n**Ревью:** 1 Blocking (тот же дефект с порогом доставки), 5 Major, 5 Minor и 3 спорных пункта, по которым нужно ваше решение.\n\n**Вам нужно сделать**\n- **Удалить `tests/test_pricing_partial.py`.** Это битый остаток прерванной сессии. Из Bash каталог `tests/` только для чтения, так что удалить его не получилось. Пока файл на месте, обычный `pytest` падает ещё на сборке.\n- **Решить три спорных пункта** (подробности в `checkpoint.md`):\n  1. Округление скидки: добавить тест «по допущению A1» или оставить округление непокрытым, пока аналитик не ответит на Q1.\n  2. Порог бесплатной доставки: считать до скидки участника или после. ТЗ допускает оба прочтения, код считает до скидки.\n  3. Нужен ли `TC-API-001` в плане, если сервиса корзины нет.\n- **Решить, менять ли `>` на `>=`.**\n\nДопущения, сделанные по ходу, перечислены в `checkpoint.md`. Мутационное тестирование не запускалось: в репозитории нет раннера."
+              },
+              {
+                "name": "stage3-redone",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/pricing/autotest-summary.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "stage4-done",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/pricing/qa-review-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.7777777777777778,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "routing-concept-question-no-pipeline",
+      "dir": "evals/routing-concept-question-no-pipeline",
+      "source": "prose",
+      "promptMarkdown": "Quick question: what's the practical difference between equivalence partitioning and boundary value analysis? Two or three sentences is enough.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 8,
+      "graders": [
+        {
+          "name": "answer-correct",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "PASS if the reply explains that equivalence partitioning picks one representative value per class of inputs that behave the same, while boundary value analysis targets the values at and just beyond the edges of those classes (e.g. min-1, min, max, max+1), and it stays brief (no more than about 120 words).\nFAIL if either technique is described incorrectly or the reply is a long document.",
+          "config": {
+            "criteria": "PASS if the reply explains that equivalence partitioning picks one representative value per class of inputs that behave the same, while boundary value analysis targets the values at and just beyond the edges of those classes (e.g. min-1, min, max, max+1), and it stays brief (no more than about 120 words).\nFAIL if either technique is described incorrectly or the reply is a long document.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "no-agents",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Agent",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "no-files",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/*",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "no-pipeline-skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "run-qa-pipeline",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.07915119999999999,
+            "judgeCostUsd": 0.0001338,
+            "durationSeconds": 11,
+            "startedAt": "2026-10-27T12:01:03.087Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-FFxSw0/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "answer-correct",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Equivalence partitioning splits the input space into classes that the system should treat the same way, so you test one representative from each class instead of every value. Boundary value analysis then focuses on the edges of those classes (min, max, just inside, just outside), because off-by-one and comparison-operator bugs cluster there.\n\nIn practice, you use EP first to decide which groups to test, then BVA to pick the most failure-prone values within them. For example, with an age field that accepts 18–65, EP gives you \"<18\", \"18–65\" and \">65\", and BVA adds 17, 18, 65 and 66."
+              },
+              {
+                "name": "no-agents",
+                "passed": true,
+                "weight": 2,
+                "explanation": "Agent called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-files",
+                "passed": true,
+                "weight": 1,
+                "explanation": "**/* absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pipeline-skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "stage1-checkout-promo-planted-defects",
+      "dir": "evals/stage1-checkout-promo-planted-defects",
+      "source": "mixed",
+      "promptMarkdown": "Here's the spec for our new promo-code feature: specs/checkout-promo.md. Before anyone writes test cases, I need the spec analysis only — gaps, contradictions, open questions, what's testable. Don't write a test plan yet.\n\nWork unattended, don't ask me anything — log any assumption you have to make. Write the documents in English and save them under docs/qa/checkout-promo/.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "analysis-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a QA spec-gap report for a promo-code spec. In the spec, §2.3 says a code is usable up to and including its expiry date, while §5.2 says codes stop working at the start of their expiry date.\n\nPASS if all of the following hold:\n- That §2.3/§5.2 conflict is reported as a contradiction (not merely as an assumption).\n- Blocking gaps and assumptions are listed in separate sections.\n- Open questions are split into a Track A list and a Track B list.\n- The report does not present invented requirements as facts (anything not in the spec is framed as a question or an explicit assumption).\n\nFAIL if any of these is missing, or if every single finding is labelled blocking.",
+          "config": {
+            "criteria": "This is a QA spec-gap report for a promo-code spec. In the spec, §2.3 says a code is usable up to and including its expiry date, while §5.2 says codes stop working at the start of their expiry date.\n\nPASS if all of the following hold:\n- That §2.3/§5.2 conflict is reported as a contradiction (not merely as an assumption).\n- Blocking gaps and assumptions are listed in separate sections.\n- Open questions are split into a Track A list and a Track B list.\n- The report does not present invented requirements as facts (anything not in the spec is framed as a question or an explicit assumption).\n\nFAIL if any of these is missing, or if every single finding is labelled blocking.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            }
+          }
+        },
+        {
+          "name": "annotated-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/checkout-promo/spec-annotated.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "finds-boundary-3000",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "(exactly|equal to|>=|≥|inclusive|at least)[^\\n]{0,80}3[ ,]?000|3[ ,]?000[^\\n]{0,80}(exactly|equal|>=|≥|inclusive|at least)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-brute-force",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "brute|enumerat|rate.?limit|number of attempts|attempts? (limit|per)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-expiry-contradiction",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Contradictions[\\s\\S]*?(5\\.2|start of (its|the) expiry)[\\s\\S]*?## Open Questions",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-untestable-fast",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "fast[^\\n]{0,200}(measur|threshold|ms\\b|millisecond|second|latency|response time|untestable|not testable)|(measur|untestable|not testable)[^\\n]{0,200}fast",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "inline-markers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-annotated.md"
+            },
+            "pattern": "\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[A\\d+[:\\]]|\\[A\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-test-plan-yet",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/test-plan.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/checkout-promo/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "requirements-inventory",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Requirements Inventory[\\s\\S]*\\| *\\**REQ-1\\** *\\|[\\s\\S]*REQ-8",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "security-lens-applied",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Security Lens\\s*\\n(?!\\s*(Not applicable|N/A))",
+            "flags": "i",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.9333333333333333,
+            "passed": false,
+            "turns": 10,
+            "costUsd": 0.4672083,
+            "judgeCostUsd": 0.0030655,
+            "durationSeconds": 195,
+            "startedAt": "2026-10-27T12:01:13.909Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-MYEk9M/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "analysis-quality",
+                "passed": true,
+                "weight": 2,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (20762 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Spec Gap Analysis — Promo codes at checkout (specs/checkout-promo.md, v1.3)\n\n## Source\n`specs/checkout-promo.md` (local Markdown file, v1.3, owner: Checkout team). Verbatim snapshot in `spec-source.md`. Text source, no extraction loss; confidence in the reading: high.\nNo `.agents/qa-project-context.md` exists in this repository, so no org Definition of Ready was available; the generic checklist below was used. Output language: English (default).\n\nNote: the spec header says \"Status: Ready for development\". Against the checklist at the bottom it is not ready for test design — one contradiction, two blocking gaps and many unspecified negative paths remain.\n\n## Testability Score: 2\nThe happy path and the code format are checkable. The score is held down by one internal contradiction (expiry boundary), two requirements that cannot be tested as written (vouchers, \"fast\"), and the near-total absence of failure outcomes, money-rounding rules and cancellation/concurrency semantics.\n\n## Requirements Inventory\n| ID | Spec location | Requirement | Acceptance criterion | Testable |\n|---|---|---|---|---|\n| REQ-1 | §1 | \"Marketing creates promo codes in the admin panel.\" | none stated | partly → Q1, Q26 |\n| REQ-2 | §2, item 1 | \"A promo code is 6–12 characters long\" | length 6–12 | partly → Q2 |\n| REQ-3 | §2, item 1 | Code \"contains Latin letters and digits only\" | charset stated; outcome for violations none | partly → Q2 |\n| REQ-4 | §2, item 2 | \"Codes are not case-sensitive.\" | none stated beyond the sentence | yes |\n| REQ-5 | §2, item 3 | \"A code can be used up to and including its expiry date.\" | none stated for time of day / timezone | partly → Q4, Q5 |\n| REQ-6 | §2, item 4 | Percentage codes give 5%, 10%, 15% or 20% off the items subtotal | percentages stated; rounding none | partly → Q6, Q7 |\n| REQ-7 | §2, item 4 | Fixed-amount code gives \"500 ₽ off\" | 500 ₽ | partly → Q7 |\n| REQ-8 | §2, item 5 | Single-use code \"cannot be used again by anyone\" once an order with it is placed | none stated for \"placed\" / concurrency | partly → Q8, Q9 |\n| REQ-9 | §2, item 6 | \"Codes apply only to orders over 3000 ₽.\" | strict \"over\" 3000 ₽; basis of the amount none | partly → Q11, Q12 |\n| REQ-10 | §3, item 1 | Promo field shown under the order summary with an \"Apply\" button | position and button label stated | yes |\n| REQ-11 | §3, item 2 | Valid code applied → \"the discount line appears in the order summary\" | none stated for line content | partly → Q15 |\n| REQ-12 | §3, item 2 | Valid code applied → \"the total is updated\" | none stated for rounding | partly → Q6 |\n| REQ-13 | §3, item 3 | Expired code → message \"This promo code has expired\" shown under the field | exact message text and position | yes |\n| REQ-14 | §3, item 4 | \"Only one promo code can be applied to an order.\" | none stated | yes |\n| REQ-15 | §3, item 4 | \"Applying a second code replaces the first.\" | none stated for an invalid second code | partly → Q17 |\n| REQ-16 | §3, item 5 | \"Coupons cannot be combined with vouchers.\" | none stated | no → Q18 |\n| REQ-17 | §3, item 6 | \"Code validation must be fast.\" | none stated | no → Q19 |\n| REQ-18 | §4, item 1 | \"The discount is recorded on the order\" | none stated for what is recorded | partly → Q21 |\n| REQ-19 | §4, item 1 | Discount is \"shown in the order confirmation email\" | none stated for content | partly → Q22 |\n| REQ-20 | §4, item 2 | Order cancelled → \"a single-use code becomes available again\" | none stated for cancellation scope | partly → Q23 |\n| REQ-21 | §5, item 1 | \"Marketing can deactivate a code at any time\" | none stated | partly → Q24, Q25 |\n| REQ-22 | §5, item 1 | \"a deactivated code behaves like an expired one\" | behavior = REQ-13 by reference | partly → Q24 |\n| REQ-23 | §5, item 2 | \"Codes stop working at the start of their expiry date.\" | none stated | partly → Q4 |\n\n§6 (gift cards, loyalty points out of scope) is a scope statement, not a testable obligation, so it has no REQ. 23 REQs in total: 4 `yes` (REQ-4, 10, 13, 14), 2 `no` (REQ-16, 17), 17 `partly`.\n\n## Blocking Gaps\n**Q18** — §3, item 5 (\"Coupons cannot be combined with vouchers\"). \"Coupon\" and \"voucher\" are never defined anywhere in the spec; the rest of the document says \"promo code\". It is unclear whether \"coupon\" = promo code, what a \"voucher\" is, whether a voucher is a gift card (§6 puts gift cards out of scope), how a customer would hold both, which one is rejected or removed, and what message is shown. No test with a concrete input and expected result can be written. Blocks REQ-16. Marker `[Q18]`.\n\n**Q19** — §3, item 6 (\"Code validation must be fast\"). No measurable target (latency percentile, load, environment). Cannot be verified or failed objectively. Blocks REQ-17 only; all functional requirements are unaffected. Marker `[Q19]`.\n\n(The expiry contradiction **Q4** below is also blocking for the \"on the expiry date itself\" boundary cases of REQ-5 and REQ-23.)\n\n## Contradictions\n**Q4** — §2, item 3 vs §5, item 2. §2.3: \"A code can be used up to and including its expiry date.\" §5.2: \"Codes stop working at the start of their expiry date.\" On the expiry date itself, the first says the code works, the second says it does not. The two rules produce opposite results for the single most important boundary of REQ-5/REQ-23 (day D). Blocking for boundary cases on day D; cases for D-1 and D+1 are unaffected. Marker `[Q4]`.\n\n## Open Questions\n### Track A — for you, now\nPer the run instruction (unattended, no questions to the operator), these were not asked in the conversation; each carries the default taken. Change them if the default is wrong.\n\n**Q26** — Is the admin panel (code creation / deactivation UI) in the test scope of this pass, or only the customer-facing checkout behavior? Default taken: A20 — admin is exercised only as a means to set up and deactivate codes (via UI, API or data seeding, whichever the later stages find available); the admin UI itself is not designed against. Marker `[Q26]`.\n\n**Q27** — Are non-functional checks (performance, rate limiting / enumeration, accessibility) in scope of this pass? Default taken: A14 — out of scope for the functional test design; they are recorded as spec gaps (Q14, Q19, Q20) and left to a separate decision. Marker `[Q27]`.\n\n**Q28** — May the pipeline proceed on a spec that has one contradiction and two blocking gaps? Default taken: A1 — yes, with blocked items kept visible: REQ-16, REQ-17 and the expiry-day boundary are marked blocked in Stage 2, not guessed. Marker `[Q28]`.\n\n### Track B — for the analyst / spec owner\nOrdered by the risk of the requirement each question blocks (money and access first). Each question stands alone; the likely owner is given in brackets. Entries without a bold ID are the Blocking Gap / Contradiction items already described above, repeated here in forwardable form.\n\n- (Q4) [PM / Checkout team] Section 2.3 says a promo code works \"up to and including its expiry date\", but section 5.2 says codes \"stop working at the start of their expiry date\". On the expiry date itself, does the code work or not?\n\n**Q8** — §2, item 5. [PM / backend lead] A single-use code \"cannot be used again\" once an order with it is \"placed\". What event counts as \"placed\": the order being created at checkout submit, successful payment, or order confirmation? If payment fails or the customer abandons the payment page, is the code consumed, reserved for some time, or still free?\n\n**Q9** — §2, item 5. [backend lead] If two customers apply the same single-use code and submit orders at the same moment, which order gets the discount and what does the other customer see (error, order without discount, order blocked)?\n\n**Q21** — §4, item 1 and §3, item 2. [backend lead] Between applying a code and placing the order the code may expire, be deactivated, be consumed by someone else, or the cart may fall to 3000 ₽ or below. Is eligibility re-checked when the order is placed? If the code is no longer valid at that moment, is the order rejected, placed without the discount, or placed with the discount anyway? And what exactly is stored on the order (code, type, percentage, discount amount in ₽, subtotal)?\n\n**Q23** — §4, item 2. [PM / backend lead] \"If the order is cancelled, a single-use code becomes available again.\" Who can cancel (customer, support, system on payment timeout), in which order statuses, and does this also apply to partial cancellation, returns and refunds? If the code has expired or been deactivated by the time of the cancellation, is it still restored (and thus still unusable)? Can anyone use the restored code, or only the original customer?\n\n- (Q18) [PM / Checkout team] Section 3.5 says \"Coupons cannot be combined with vouchers\". What are \"coupons\" and \"vouchers\" as distinct from promo codes — is a voucher the same as a gift card? When a customer has both, which one is kept, which one is rejected, in what order, and what message is shown?\n\n**Q11** — §2, item 6. [PM] \"Codes apply only to orders over 3000 ₽.\" Which amount is compared with 3000 ₽: the items subtotal (as §2.4 uses), the subtotal after discounted/sale prices, the total including delivery, or the total after the promo discount? \"Over\" is read as strictly greater than 3000.00 ₽ — confirm.\n\n**Q12** — §2, item 6. [PM / UX] What does the customer see when a valid code is entered for an order of 3000 ₽ or less (message text, code kept or dropped)? And if a code is already applied and the customer then removes items or changes quantities so the order falls to 3000 ₽ or below — is the code removed, is the discount kept, or is checkout blocked? Likewise, when quantities change with a percentage code applied, is the discount recalculated?\n\n**Q6** — §2, item 4 and §3, item 2. [PM / backend lead] How is a percentage discount rounded to kopecks (half-up, half-even, down, up), and is it rounded per item or on the whole subtotal? Which value is rounded — the discount or the new total?\n\n**Q7** — §2, item 4. [PM] (a) Is 500 ₽ the only fixed amount, or an example (can marketing create 300 ₽ or 1000 ₽ codes)? Likewise, are 5/10/15/20% the only allowed percentages, and does the admin panel enforce that list? (b) What is included in \"items subtotal\": are items already on sale included at their sale price, and are delivery and taxes excluded?\n\n**Q10** — §2, item 5. [PM] \"Some codes are single-use.\" How is the flag set (admin field at creation?), and what are the limits for all other codes — unlimited uses by anyone, a per-customer limit, a total limit? Can a guest (not logged in) use a code, and can the same customer use the same multi-use code on several orders?\n\n**Q25** — §5, item 1. [backend lead / security] Which admin roles may create and deactivate codes, and are these actions written to an audit log (who, when, which code)? What happens when a user without the role calls the same action?\n\n**Q14** — §3, item 1. [security / backend lead] Codes are 6–12 characters of letters and digits and the spec sets no limit on attempts. Is there rate limiting or temporary blocking after repeated invalid codes (per session, IP, account)? Should the error responses for \"does not exist\", \"expired\" and \"already used\" be distinguishable (the \"expired\" message confirms the code exists)?\n\n**Q24** — §5, item 1. [PM / backend lead] When marketing deactivates a code, what happens to a cart that already has it applied and to a checkout in progress? Can a deactivated code be reactivated? Can a code that has already been used be deactivated? Does the deactivated code show exactly \"This promo code has expired\" (as \"behaves like an expired one\" implies), or a different message? Does deactivation touch orders already placed (it should not — confirm)?\n\n**Q17** — §3, item 4. [PM / UX] A promo code is already applied and the customer enters a second code. If the second code is invalid (expired, unknown, below threshold), does the first code stay applied or is it removed? What if the customer enters the same code again?\n\n**Q5** — §2, item 3. [PM / backend lead] An expiry is a date with no time or timezone. In which timezone does the expiry day begin and end (store timezone, server UTC, customer's timezone)? Which timezone is shown to marketing in the admin panel?\n\n**Q2** — §2, item 1. [PM / UX] What happens when the customer enters something that is not a valid code format: fewer than 6 or more than 12 characters, a space, hyphen or other symbol, Cyrillic characters that look like Latin ones, or an empty field? Is the Apply button disabled, is an inline error shown, or is the lookup simply \"not found\"? Are leading/trailing spaces trimmed? Is pasted text with a trailing space accepted?\n\n**Q16** — §3, item 3. [PM / UX] Only one error message is defined (\"This promo code has expired\"). What are the outcomes and exact messages for: unknown code, malformed code, single-use code already used, order of 3000 ₽ or less, voucher conflict, and a server error or timeout during validation? Is the total in all of these cases unchanged?\n\n**Q1** — §1. [PM / Marketing] What are the rules for creating a code in the admin panel: required fields, whether code uniqueness is checked case-insensitively (§2.2 means `SPRING10` and `spring10` would clash), whether the format of §2.1 and the percentage list of §2.4 is enforced at creation, and whether an existing code's expiry, type or value can be edited?\n\n- (Q19) [tech lead / PM] Section 3.6 says \"Code validation must be fast\". What is the target: response time at which percentile, under what load, in which environment?\n\n**Q22** — §4, item 1. [PM] What does the confirmation email show about the discount: the code, the discount line with an amount, the new total? In which language and at what point is it sent, and does a failure to send the email affect the order?\n\n**Q15** — §3, item 2. [UX] What does the \"discount line\" look like: label text (does it show the code?), sign and format of the amount (e.g. \"−500 ₽\"), position relative to the subtotal and total? What is the exact result for a percentage code — is the percentage shown?\n\n**Q13** — §3, item 1. [UX] Can the customer remove an applied code (and how)? Does the applied code survive a page reload or leaving and returning to checkout within the same cart? Is the field editable after a code is applied? Does pressing Enter in the field act as \"Apply\"?\n\n**Q20** — §3 (silence). [PM / UX] The spec says nothing about accessibility (error message announced to screen readers, keyboard use), localization (the only message is in English, while the prices are in ₽ — is the English text final or is there a translated message?), or supported browsers/devices and mobile layout. Are any of these in scope?\n\n**Q3** — §2, item 2. [UX] Codes are not case-sensitive. In what case is the code shown back to the customer (as typed, as stored, uppercase) on the discount line and in the email?\n\n## Assumptions Made to Proceed\n**A1** — (Q4, Q28) The contradiction is not resolved by choosing a side. Boundary cases for the expiry day itself are marked blocked in Stage 2; cases for the day before expiry (code works) and the day after (code does not work) are valid under both readings and proceed. Why: both readings are plausible and either would silently invent a requirement.\n\n**A2** — (Q5) A single business timezone is used and tests avoid sub-day precision: expiry cases use dates at least one full day away from \"today\". Why: it keeps cases valid regardless of the timezone chosen.\n\n**A3** — (Q6) Percentage discount is computed on the items subtotal and rounded half-up to 0.01 ₽; the total is subtotal − discount. Contestable — rounding is a money rule the owner should confirm.\n\n**A4** — (Q7) 500 ₽ and 5/10/15/20% are the only values; \"items subtotal\" = sum of line price × quantity of the cart items at their displayed price, excluding delivery and taxes. Why: the spec lists exactly these values and names \"items subtotal\".\n\n**A5** — (Q8) \"Placed\" = the order was successfully created at checkout submission. Failed or abandoned payment behavior is not tested until Q8 is answered. Contestable.\n\n**A6** — (Q9) Single-use invariant: of two simultaneous submissions with the same single-use code, at most one order gets the discount. Which response the loser sees is not asserted. Why: \"cannot be used again by anyone\" implies it.\n\n**A7** — (Q10) Codes that are not single-use have no usage limit (any number of uses by anyone, guests included). Why: nothing in the spec limits them.\n\n**A8** — (Q11) The 3000 ₽ threshold is compared with the items subtotal before the promo discount, strictly greater: 3000.00 is not eligible, 3000.01 is eligible. Why: \"over\" is strict, and §2.4 names the items subtotal as the base. Contestable (basis).\n\n**A9** — (Q12, Q16) For every failure other than expiry (unknown, malformed, already used, below threshold): the code is not applied, the total is unchanged, and some visible error is shown; only the expired message text is asserted. Eligibility is re-evaluated when the cart changes. Contestable.\n\n**A10** — (Q13) Removal of an applied code and persistence across reload are not tested.\n\n**A11** — (Q17) If a second code is invalid, the first code stays applied. Contestable — the opposite reading (first code is dropped) is also reasonable.\n\n**A12** — (Q18) No assumption: REQ-16 is blocked, no cases are written for it.\n\n**A13** — (Q19, Q27) REQ-17 is excluded from functional test design; if a performance check is wanted, it needs a numeric target first.\n\n**A14** — (Q14, Q20, Q27) Rate limiting, enumeration resistance, accessibility, localization and browser/device matrix are out of this pass's functional design and stay recorded as gaps.\n\n**A15** — (Q21) Eligibility is re-validated server-side when the order is placed: an order cannot receive a discount from a code that is expired, deactivated or already consumed at that moment. Contestable.\n\n**A16** — (Q23) Cancelling an order restores a single-use code to \"unused\" regardless of who cancels it; if it has expired or been deactivated in the meantime it is restored but remains unusable.\n\n**A17** — (Q24) A deactivated code shows the same message as an expired code (\"This promo code has expired\"), reading §5.1 literally. Contestable — the message is misleading for the customer.\n\n**A18** — (general) One currency (RUB, ₽); amounts have kopeck precision (2 decimals).\n\n**A19** — (security, Q21) Discount amounts are calculated server-side from the code and the cart; the client cannot send its own discount value. Why: baseline for any pricing feature; tests will try to tamper with it as a negative case.\n\n**A20** — (Q26) The admin panel is not tested as a UI; codes are created and deactivated through whichever mechanism the later stages find available (admin UI, API or seed data).\n\n## Security Lens\nTriggers present: user input (code field), pricing/payment amount, admin actions, personal data (confirmation email).\n\n| OWASP 2025 area | Applies? | Result |\n|---|---|---|\n| A01 Broken Access Control | Yes — deactivation/creation of codes in the admin panel; single-use \"by anyone\" | Q25 (roles, unauthorized calls); Q10 (who may use a code) |\n| A05 Injection | Yes — free-text code field | Q2 (what the field accepts); format is restricted to letters/digits by §2.1, so injection strings should be rejected as malformed — covered under Q2 |\n| A06 Insecure Design | Yes — no attempt limit, distinguishable errors, race on single-use, replay after cancel | Q14 (enumeration / brute force), Q9 (race), Q23 (restore after cancel), A19 (server-side pricing) |\n| A09 Security Logging & Alerting Failures | Yes — admin deactivation and repeated failed attempts | Q25 (audit log), Q14 |\n| A10 Mishandling of Exceptional Conditions | Yes — validation timeout or backend error during Apply | Q16 (outcome when validation fails) |\n| A07 Authentication Failures | Not applicable beyond Q10 — no login or session behavior is specified by this feature | — |\n| A04 Cryptographic Failures, A02 Security Misconfiguration, A03 Supply Chain, A08 Integrity Failures | Not applicable — no secrets, configuration, dependencies or signed artifacts in this spec | — |\n| Personal data | The confirmation email carries order data only; no new personal data introduced by the feature | Q22 (email content) |\n\n## Ready-for-Test-Design Checklist\n- [ ] Every in-scope user action has a success and failure outcome — only the success path and the \"expired\" failure are defined (Q16, Q2, Q12)\n- [ ] Every acceptance criterion is objectively checkable — REQ-16 and REQ-17 are not (Q18, Q19)\n- [ ] Edge cases are addressed or explicitly out of scope — rounding, threshold basis, concurrency, timezone and cancellation are not (Q6, Q11, Q9, Q5, Q23)\n- [ ] No unresolved contradictions remain — Q4 is open\n"
+              },
+              {
+                "name": "annotated-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/checkout-promo/spec-annotated.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-boundary-3000",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in file docs/qa/checkout-promo/spec-gap-report.md",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-brute-force",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched brute|enumerat|rate.?limit|number of attempts|attempts? (limit|per)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-expiry-contradiction",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched ## Contradictions[\\s\\S]*?(5\\.2|start of (its|the) expiry)[\\s\\S]*?## Open Questions",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-untestable-fast",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched fast[^\\n]{0,200}(measur|threshold|ms\\b|millisecond|second|latency|response time|untestable|not testable)|(measur|untestable|not testable)[^\\n]{0,200}fast",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "inline-markers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[A\\d+[:\\]]|\\[A\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]]",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-test-plan-yet",
+                "passed": true,
+                "weight": 1,
+                "explanation": "**/test-plan.md absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/checkout-promo/spec-gap-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "requirements-inventory",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Requirements Inventory[\\s\\S]*\\| *\\**REQ-1\\** *\\|[\\s\\S]*REQ-8",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "security-lens-applied",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Security Lens\\s*\\n(?!\\s*(Not applicable|N/A))",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.9333333333333333,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage1-password-reset-security-lens-ru",
+      "dir": "evals/stage1-password-reset-security-lens-ru",
+      "source": "mixed",
+      "promptMarkdown": "Проанализируй ТЗ на восстановление пароля: specs/password-reset.md. Нужен только анализ ТЗ (пробелы, противоречия, вопросы аналитику), тест-план пока не пиши.\n\nРаботай без вопросов ко мне, все допущения фиксируй в отчёте. Документы — на русском, в папку docs/qa/password-reset/.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "finds-account-enumeration",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "перечисл|enumerat|раскрыва[а-я]* (факт|наличи|существ)|узна[а-я]* ,? ?(зарегистр|существ)|одинаков[а-я]* (сообщ|ответ)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-rate-limit",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "rate.?limit|лимит|ограничени[ея] (числа|количества|частоты)|частот[а-я]* запрос|спам|перебор",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-token-lifetime",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "(токен|ссылк)[^\\n]{0,160}(срок|время жизни|истека|TTL|действител)|(срок|время жизни|TTL)[^\\n]{0,160}(токен|ссылк)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/password-reset/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "security-lens-section",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "## (Security Lens|Безопасность)[^\\n]*\\n[\\s\\S]{0,4000}A0?7",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "security-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a Russian-language QA spec-gap report for a password-reset spec. The spec shows a different message when the email is not registered, never says how long the reset link is valid, never says whether the link can be reused, and never limits how often a reset can be requested.\n\nPASS if the report (in Russian) raises at least three of those four issues as open questions or gaps (not as facts it decided on its own), and routes product-rule questions to the analyst/spec owner (Track B).\nFAIL if fewer than three are raised, if the report is mostly in English, or if it silently decides the security rules itself without flagging them.",
+          "config": {
+            "criteria": "This is a Russian-language QA spec-gap report for a password-reset spec. The spec shows a different message when the email is not registered, never says how long the reset link is valid, never says whether the link can be reused, and never limits how often a reset can be requested.\n\nPASS if the report (in Russian) raises at least three of those four issues as open questions or gaps (not as facts it decided on its own), and routes product-rule questions to the analyst/spec owner (Track B).\nFAIL if fewer than three are raised, if the report is mostly in English, or if it silently decides the security rules itself without flagging them.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            }
+          }
+        },
+        {
+          "name": "written-in-russian",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "(Перечень требований|Требования)[\\s\\S]*[А-Яа-я]{4,}[\\s\\S]*[А-Яа-я]{4,}",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 15,
+            "costUsd": 0.35412530000000003,
+            "judgeCostUsd": 0.0018653999999999997,
+            "durationSeconds": 122,
+            "startedAt": "2026-10-27T12:03:23.370Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-t5I6ch/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "finds-account-enumeration",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched перечисл|enumerat|раскрыва[а-я]* (факт|наличи|существ)|узна[а-я]* ,? ?(зарегистр|существ)|одинаков[а-я]* (сообщ|ответ)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-rate-limit",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched rate.?limit|лимит|ограничени[ея] (числа|количества|частоты)|частот[а-я]* запрос|спам|перебор",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "finds-token-lifetime",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched (токен|ссылк)[^\\n]{0,160}(срок|время жизни|истека|TTL|действител)|(срок|время жизни|TTL)[^\\n]{0,160}(токен|ссылк)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/password-reset/spec-gap-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "security-lens-section",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## (Security Lens|Безопасность)[^\\n]*\\n[\\s\\S]{0,4000}A0?7",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "security-quality",
+                "passed": true,
+                "weight": 2,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (11091 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Анализ ТЗ — Восстановление пароля\n\n## Источник\nspecs/password-reset.md, версия 0.9, владелец — команда «Аккаунт» (markdown, текст извлечён без потерь). Снимок: spec-source.md; текст с пометками: spec-annotated.md.\n\n## Оценка тестируемости: 2\nОсновной путь описан, но у ключевых требований нет проверяемых критериев (срок токена, «надёжный» пароль, поведение при плохом токене), а механизм безопасности почти не специфицирован.\n\n## Перечень требований\n| ID | Место в ТЗ | Требование | Критерий приёмки | Тестируемо |\n|---|---|---|---|---|\n| REQ-1 | §1 | Забывший пароль пользователь может задать новый пароль через ссылку из письма | не указан (сквозной сценарий) | partly → Q9, Q11, Q14 |\n| REQ-2 | §2.1 | На странице входа есть ссылка «Забыли пароль?», ведущая на форму с полем «Email» | ссылка и поле присутствуют | yes |\n| REQ-3 | §2.2 | После нажатия «Отправить» система ищет пользователя по email | не указан | partly → Q2, Q3 |\n| REQ-4 | §2.3 | Если пользователь найден, на его email отправляется письмо со ссылкой для сброса | не указан (содержимое, сроки) | partly → Q4, Q5, Q6 |\n| REQ-5 | §2.3 | Если пользователь найден, показывается сообщение «Письмо отправлено» | текст сообщения | yes |\n| REQ-6 | §2.4 | Если пользователь не найден, показывается «Пользователь с таким email не зарегистрирован» | текст сообщения | partly → Q8 |\n| REQ-7 | §3.1 | Ссылка содержит уникальный токен | не указан | partly → Q10 |\n| REQ-8 | §3.2 | По ссылке открывается форма «Новый пароль» и «Повторите пароль» | не указан для неверных токенов | partly → Q11 |\n| REQ-9 | §3.3 | Новый пароль должен быть надёжным | не указан | no → Q14 |\n| REQ-10 | §4.1 | Если пароли в двух полях совпадают, пароль меняется | новый пароль работает при входе (выведено, не заявлено) | partly → Q16 |\n| REQ-11 | §4.1 | После смены пользователь перенаправляется на страницу входа | редирект на страницу входа | yes |\n| REQ-12 | §4.2 | Если пароли не совпадают, показывается «Пароли не совпадают» | текст сообщения | yes |\n| REQ-13 | §4.3 | После смены пароля на email отправляется уведомление | не указан (содержимое, сроки) | partly → Q21 |\n\n## Блокирующие пробелы\nБез ответа нельзя написать кейс с определённым ожидаемым результатом.\n\n1. **Q9** — §3.1: не задан срок жизни токена. Нельзя проверить ни границу «ещё действует / уже просрочен», ни то, что просроченная ссылка отвергается. Блокирует REQ-1, REQ-7, REQ-8. Маркер в spec-annotated.md.\n2. **Q11** — §3.1–3.2: нет поведения для токена просроченного, использованного, заменённого новым, повреждённого или несуществующего (какая страница, какой текст, куда ведёт). Блокирует негативные сценарии REQ-8.\n3. **Q14** — §3.3: «надёжный» не определён и непроверяем (длина, классы символов, словарь запрещённых). Блокирует REQ-9 целиком и границы для REQ-10.\n\n## Противоречия\n1. **Q1** — шапка: «Версия 0.9» (черновик) против «Статус: готово к разработке», при том что документ содержит три блокирующих пробела. Не блокирует тест-дизайн, но статус нельзя считать подтверждением полноты.\n2. **Q16** — §3.3 («пароль должен быть надёжным») против §4.1 (пароль меняется, если поля совпадают — других условий нет). Совпадающие слабые пароли: меняются или отклоняются, и каким сообщением? Тест-дизайн по REQ-9/REQ-10 зависит от ответа.\n\n## Открытые вопросы\n\n### Track A — для вас, сейчас\n(нет) Вы просили работать без вопросов, поэтому решения уровня оператора приняты как допущения A1–A8 ниже. Если какое-то из них неверно — скажите, это дёшево исправить до тест-плана.\n\n### Track B — для аналитика / владельца ТЗ (команда «Аккаунт»)\nКаждый вопрос самодостаточен; порядок — по риску затронутого требования (доступ и учётные данные в начале).\n\n1. **Q11** — Что должен увидеть пользователь, если открыл ссылку сброса с токеном, который просрочен, уже использован, заменён более новым запросом или не существует/повреждён (текст, страница, есть ли ссылка на повторный запрос)? Нужно ли различать эти случаи в ответе?\n2. **Q9** — Каков срок жизни токена сброса пароля (в минутах/часах) и от какого момента он отсчитывается?\n3. **Q10** — Каковы требования к токену: источник случайности и минимальная длина, хранится ли он в базе в виде хэша, одноразовый ли он?\n4. **Q17** — Завершаются ли все существующие сессии и refresh-токены пользователя (на всех устройствах) после смены пароля?\n5. **Q8** — Сообщение «Пользователь с таким email не зарегистрирован» позволяет определить, какие email есть в системе. Это сознательное решение, или на оба случая нужен одинаковый ответ (например, «Если адрес зарегистрирован, письмо отправлено») и одинаковое время ответа?\n6. **Q7** — Какие ограничения частоты запросов и защита от автоматизации нужны на форме запроса (по IP, по email; капча; лимит писем в час) и на форме нового пароля? Что видит пользователь при превышении лимита?\n7. **Q12** — Погашается ли токен при открытии ссылки (GET) или только при успешной отправке формы нового пароля? Как защищаемся от предзагрузки ссылки почтовыми сканерами и утечки токена через Referer и логи?\n8. **Q3** — Могут ли сбросить пароль: неподтверждённые, заблокированные, удалённые аккаунты; аккаунты, созданные через соцсети и не имеющие пароля; аккаунты с включённой 2FA (сброс пароля не должен обходить второй фактор)? Что видит пользователь в каждом случае?\n9. **Q14** — Какова политика надёжности нового пароля: минимальная и максимальная длина, обязательные классы символов, список запрещённых паролей, допустимость пробелов и Unicode? Какое сообщение показывается при нарушении?\n10. **Q18** — Остаётся ли токен действительным после неудачной попытки (несовпадение, слабый пароль)? Как обрабатывается двойная отправка формы и использование одного токена в двух вкладках одновременно?\n11. **Q16** — Если оба поля совпадают, но пароль не соответствует политике надёжности, пароль меняется или отклоняется? Каким сообщением?\n12. **Q20** — Если пароли одновременно не совпадают и слабые, какое сообщение показывается первым? Проверка совпадения выполняется только в браузере или и на сервере? Сохраняется ли ввод в полях после ошибки?\n13. **Q15** — Разрешено ли новым паролем указать текущий пароль или один из прежних?\n14. **Q4** — Каково содержимое письма со ссылкой (отправитель, тема, текст, язык), откуда берётся базовый адрес ссылки (фиксированная настройка, а не заголовок Host запроса) и в какой срок письмо должно быть доставлено?\n15. **Q5** — Что видит пользователь, если письмо не удалось отправить (почтовый сервис недоступен, таймаут)? Сообщение «Письмо отправлено» показывается при любом исходе?\n16. **Q6** — Что происходит при повторных запросах на один email: прежние токены аннулируются? Есть ли минимальный интервал между письмами и возможность «отправить ещё раз»?\n17. **Q21** — Каково содержимое уведомления о смене пароля (в нём не должно быть пароля и токена), что происходит при сбое его отправки — смена пароля остаётся в силе?\n18. **Q13** — Что происходит, если ссылку сброса открывает уже авторизованный пользователь? Нужно ли маскировать поля пароля, задан ли запрет автозаполнения и максимальная длина ввода?\n19. **Q2** — Как обрабатывается пустое поле «Email», невалидный формат, пробелы по краям, чувствительность к регистру, слишком длинное значение?\n20. **Q19** — Показывается ли сообщение об успешной смене на странице входа после редиректа? Что видит пользователь при сбое сервиса или БД в момент смены пароля?\n21. **Q22** — Какие нефункциональные требования действуют: время отклика, доступность (a11y), локализация, поддерживаемые браузеры и устройства, аудит-логирование запросов и смен пароля?\n22. **Q1** — Каков фактический статус ТЗ: версия 0.9 (черновик) или «готово к разработке»? Планируется ли новая версия, закрывающая вопросы выше?\n\n## Допущения\n1. **A1** — Тексты «Письмо отправлено», «Пользователь с таким email не зарегистрирован», «Пароли не совпадают» — дословный ожидаемый результат, включая регистр и пунктуацию. Причина: ТЗ приводит их в кавычках.\n2. **A2** — «Пароли совпадают» = точное равенство значений двух полей с учётом регистра, без обрезки пробелов. Причина: иное в ТЗ не сказано, это самое простое прочтение. Спорно, если команда обрезает пробелы.\n3. **A3** — До ответа на Q8 требованием считается текст §2.4 как есть; различие ответов фиксируется как риск безопасности, а не как «правильное» поведение. Спорно: если владелец решит унифицировать ответ, кейсы по REQ-5 и REQ-6 меняются.\n4. **A4** — «Уникальный токен» = каждый запрос порождает новое значение, не совпадающее с выданными другим запросам и пользователям. Непредсказуемость и одноразовость не подразумеваются (см. Q10).\n5. **A5** — Поиск по email — точное совпадение; регистр, пробелы и формат не специфицированы (Q2), кейсы на них отложены.\n6. **A6** — Работа продолжается на неполном ТЗ. Требования, зависящие от Q9, Q11, Q14, помечаются как заблокированные в тест-плане; значения (срок токена, правила пароля) не придумываются.\n7. **A7** — Файла `.agents/qa-project-context.md` нет: используется общий чек-лист готовности, язык документов — русский, task-id = `password-reset` (из пути, указанного в задаче).\n8. **A8** — Включён security lens: функция затрагивает аутентификацию, пользовательский ввод и персональные данные.\n\n## Безопасность\nПрименимые строки OWASP Top 10 (2025):\n- **A01 Broken Access Control** — владение аккаунтом доказывается только токеном: Q11 (невалидные токены), Q18 (повторное и параллельное использование), Q3 (какие аккаунты допускаются), Q13.\n- **A02 Security Misconfiguration** — токен в URL: утечка через Referer, логи, предзагрузку: Q12.\n- **A04 Cryptographic Failures** — энтропия, хранение хэша, одноразовость токена: Q10, Q9.\n- **A05 Injection** — email из формы попадает в запрос поиска и в письмо; базовый URL ссылки не должен браться из заголовка Host: Q2, Q4.\n- **A06 Insecure Design** — перечисление пользователей по различию сообщений (Q8), отсутствие лимитов запросов (Q7), повторные токены (Q6).\n- **A07 Authentication Failures** — слабые пароли (Q14, Q16), сессии после смены (Q17), смена пароля при 2FA/соцвходе (Q3).\n- **A09 Security Logging & Alerting Failures** — события восстановления не упомянуты в аудите: Q22.\n- **A10 Mishandling of Exceptional Conditions** — сбой отправки письма и сбой при смене пароля: Q5, Q19, Q21.\n\nНе применимы: **A03 Software Supply Chain Failures** и **A08 Software or Data Integrity Failures** — ТЗ не вводит сторонних компонентов, обновлений или сериализуемых данных, о которых можно спрашивать на уровне требований.\n\n## Готовность к тест-дизайну\n- [ ] У каждого действия пользователя есть исход при успехе и при сбое — нет: нет исходов для плохого токена (Q11), сбоя почты (Q5), пустого/невалидного email (Q2)\n- [ ] Каждый критерий приёмки объективно проверяем — нет: REQ-9 («надёжный», Q14), срок токена (Q9)\n- [ ] Граничные случаи описаны или явно вынесены из объёма — нет: Q2, Q15, Q18, Q22\n- [ ] Нет неразрешённых противоречий — нет: Q1, Q16\n\nИтог: тест-дизайн можно начинать для REQ-2, 5, 11, 12 и частично для остальных; REQ-9 и негативные сценарии токена заблокированы до ответов на Q9, Q11, Q14. Рекомендуется отправить владельцу ТЗ как минимум верхние 5–9 вопросов Track B.\n"
+              },
+              {
+                "name": "written-in-russian",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched (Перечень требований|Требования)[\\s\\S]*[А-Яа-я]{4,}[\\s\\S]*[А-Яа-я]{4,}",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "stage2-test-design-from-gap-report",
+      "dir": "evals/stage2-test-design-from-gap-report",
+      "source": "mixed",
+      "promptMarkdown": "The spec analysis for the cart/orders feature is done — everything is in docs/qa/cart-orders/ and the task file in docs/qa/pipeline-state/. Now write the test plan and the test cases. Documentation only — no autotests yet. Don't ask me anything; English, please.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 80,
+      "graders": [
+        {
+          "name": "bva-quantity",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "TC-[A-Z]+-\\d{3}[^\\n]{0,6000}[Qq]uantity[^\\n]{0,600}\\b21\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "bva-shipping-threshold",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "4[ ,]?999[.,]99[^\\n]{0,4000}5[ ,]?000|5[ ,]?000[^\\n]{0,4000}4[ ,]?999[.,]99",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "decision-table-named",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\\*\\*Technique:\\*\\*\\s*Decision table",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "illegal-transition",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "\\*\\*Technique:\\*\\*\\s*State transition[^\\n]{0,200}(illegal|invalid|forbidden)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-autotests-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/*.{spec,test}.{ts,js}",
+            "exists": false
+          }
+        },
+        {
+          "name": "plan-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/cart-orders/test-plan.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "plan-has-risk-assessment",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            },
+            "pattern": "## Risk Assessment[\\s\\S]*P0",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plan-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a test plan for: quantity limits 1–20 (REQ-1/2), subtotal arithmetic (REQ-3), free shipping at ≥ 5000 (REQ-4), a member discount with three conditions (REQ-5), and an order state machine with cancellation (REQ-6).\n\nPASS if all hold: (a) every REQ-1…REQ-6 appears in a risk table with a priority and in a traceability matrix; (b) the money rules (REQ-3, REQ-4, REQ-5) are not given a lower priority than the error message rule (REQ-2); (c) the pyramid rationale puts pure calculations at unit level rather than E2E; (d) the plan records which assumptions (A1–A3) it builds on.\nFAIL if any of (a)–(d) is missing.",
+          "config": {
+            "criteria": "This is a test plan for: quantity limits 1–20 (REQ-1/2), subtotal arithmetic (REQ-3), free shipping at ≥ 5000 (REQ-4), a member discount with three conditions (REQ-5), and an order state machine with cancellation (REQ-6).\n\nPASS if all hold: (a) every REQ-1…REQ-6 appears in a risk table with a priority and in a traceability matrix; (b) the money rules (REQ-3, REQ-4, REQ-5) are not given a lower priority than the error message rule (REQ-2); (c) the pyramid rationale puts pure calculations at unit level rather than E2E; (d) the plan records which assumptions (A1–A3) it builds on.\nFAIL if any of (a)–(d) is missing.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            }
+          }
+        },
+        {
+          "name": "plan-traces-all-reqs",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            },
+            "pattern": "## Traceability Matrix[\\s\\S]*REQ-1[\\s\\S]*REQ-2[\\s\\S]*REQ-3[\\s\\S]*REQ-4[\\s\\S]*REQ-5[\\s\\S]*REQ-6",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-writer|test-planning|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "pyramid-not-inverted",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "TC-E2E-005",
+            "flags": "",
+            "match": "not_contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.7007186999999999,
+            "judgeCostUsd": 0.0018519999999999995,
+            "durationSeconds": 246,
+            "startedAt": "2026-10-27T12:04:29.291Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-fePbxG/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "bva-quantity",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched TC-[A-Z]+-\\d{3}[^\\n]{0,6000}[Qq]uantity[^\\n]{0,600}\\b21\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "bva-shipping-threshold",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched 4[ ,]?999[.,]99[^\\n]{0,4000}5[ ,]?000|5[ ,]?000[^\\n]{0,4000}4[ ,]?999[.,]99",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "decision-table-named",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\*\\*Technique:\\*\\*\\s*Decision table",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "illegal-transition",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched \\*\\*Technique:\\*\\*\\s*State transition[^\\n]{0,200}(illegal|invalid|forbidden)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-autotests-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "**/*.{spec,test}.{ts,js} absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/cart-orders/test-plan.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-has-risk-assessment",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Risk Assessment[\\s\\S]*P0",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-quality",
+                "passed": true,
+                "weight": 2,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (9777 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Test plan — Cart limits, shipping and order cancellation (cart-orders)\n\nOutput language: English. Inputs: `spec-source.md`, `spec-gap-report.md`, `spec-annotated.md`.\n\n## Scope\n\n**In scope (all six requirements):**\n- REQ-1 Quantity per line 1..20, including quantity abuse (negative, huge, non-integer, non-numeric)\n- REQ-2 Out-of-range error message and kept previous quantity\n- REQ-3 Subtotal calculation and recalculation after every change\n- REQ-4 Shipping 300 ₽, free from 5000 ₽\n- REQ-5 Loyalty member 5% discount (threshold 3000 ₽, not in a sale period)\n- REQ-6 Order lifecycle and cancellation rules, including the owner-only cancel check (security lens A01)\n\n**Out of scope (with reason):**\n- Authentication flows (OWASP A07) and sensitive-data handling (A04): not applicable per the gap report's Security Lens.\n- Refund or payment reversal when a Paid order is cancelled: the spec says nothing about it (OP-4).\n- Non-functional checks (performance, accessibility, visual): no requirement states them.\n\n**Blocked:** none. The gap report has no Blocking Gaps. REQ-5 is \"partly testable\" because of Q1; it is tested on A1/A2, and the cases that depend on them are marked **[assumption-based]**.\n\n**Deliberate omissions (stated, not silent):**\n- Quantity 2 and 19 (min+1, max-1) and a mid-range value are not written as separate cases: they are in the same valid partition as 1 and 20 and would add no coverage.\n- Non-owner cancel of a Paid order is not a second case: it is the same attacker partition as TC-API-013 (another user's order). If a defect shows ownership is checked only in some states, add it.\n- Backward state moves (for example Shipped → Paid) are not tested: the spec does not forbid or allow them explicitly (OP-7).\n\n## Assumptions\n\n### Inherited from Stage 1 (the test design is built on these)\n| ID | Assumption | Cases that depend on it |\n|---|---|---|\n| A1 | Member discount is rounded half-up to 0.01 ₽; the 3000 ₽ threshold is checked on the subtotal before any discount (related to Q1) | TC-UNIT-012, 013, 015, 016 |\n| A2 | \"Sale period\" is a boolean flag provided by the pricing service | TC-UNIT-010 to 016, TC-API-009, TC-API-010 |\n| A3 | Only the order's owner can cancel it; any other user gets 403 | TC-API-011, TC-API-013 |\n\n**Q1** (Track B, unresolved): how the member discount is rounded and whether the 3000 ₽ threshold is checked before or after the discount. Not a Blocking Gap. The REQ-5 cases that depend on it will need re-checking when the product analyst answers.\n\n### Stage 2's own assumptions\n| ID | Assumption | Cases that depend on it |\n|---|---|---|\n| A4 (Stage 2) | The free-shipping threshold (5000 ₽) is evaluated on the subtotal before the member discount, consistent with A1. The spec says \"subtotal\" in both rules | TC-UNIT-016 |\n| A5 (Stage 2) | A non-integer or non-numeric quantity (2.5, \"abc\") is treated like an out-of-range one: it is rejected and the previous quantity is kept. The error message for it is not asserted | TC-API-006, TC-API-007, TC-MAN-001 |\n| A6 (Stage 2) | The spec defines no API. Endpoint paths and field names in the API cases are logical placeholders, and a rejection is asserted as \"any 4xx, never 5xx\", not a specific code. Only 403 (from A3) is asserted exactly | all TC-API |\n| A7 (Stage 2) | A successful cancel is asserted only as \"request succeeds and the status is no longer the previous one\". The name of the state after cancellation is not in the spec's lifecycle | TC-UNIT-017, 018, TC-API-011, TC-E2E-003 |\n| A8 (Stage 2) | Skipping a state (Created → Shipped) is not allowed; this is read from the spec's ordered lifecycle \"Created → Paid → Shipped → Delivered\" | TC-UNIT-024 |\n\n### Open points for the spec owner (proposed for Track B; not decided here)\n| ID | Open point | Handling in this plan |\n|---|---|---|\n| OP-1 | Error message for a non-integer or non-numeric quantity | Message not asserted; invariant only (rejected, quantity kept) |\n| OP-2 | State after cancellation (is there a \"Cancelled\" state?) | Asserted only as \"status changed\" (A7) |\n| OP-3 | Cancelling an already-cancelled order; whether a cancel control remains | Not asserted; explored in TC-MAN-001 |\n| OP-4 | Refund behavior when a Paid order is cancelled | Out of scope; explored in TC-MAN-001 |\n| OP-5 | How free shipping is displayed (\"0 ₽\" or \"Free\") | E2E asserts the numeric amount only |\n| OP-6 | Subtotal and shipping for an empty cart | Not asserted; explored in TC-MAN-001 |\n| OP-7 | Whether backward or repeated state moves are allowed; precedence of 403 versus \"state not cancellable\" when a non-owner cancels a Shipped order | Not tested |\n| OP-8 | Rounding of a subtotal when a price has more than two decimals | Not tested; prices in test data have at most two decimals |\n\n## Risk Assessment\n\nImpact and Probability follow `risk-based-testing` (Pipeline Mode). Every open Q or A touching a requirement adds 1 to Probability.\n\n| REQ | Impact (1-5) | Probability (1-5) | Score | Zone | Priority | Depth / rationale |\n|---|---|---|---|---|---|---|\n| REQ-1 | 4 | 3 | 12 | HIGH | P1 | Quantity abuse (A06) can corrupt totals; off-by-one at 1 and 20. All four boundaries plus every abuse partition (negative, int32, int64, non-integer, non-numeric); A5 adds 1 to Probability |\n| REQ-2 | 3 | 3 | 9 | MEDIUM | P2 | Exact message and kept value; one unit case, one API case, one E2E case for the display. A5/OP-1 adds 1 to Probability |\n| REQ-3 | 5 | 2 | 10 | HIGH | P1 | Money. Multi-line sum, fractional-price precision, recalculation after change |\n| REQ-4 | 5 | 3 | 15 | CRITICAL | P0 | Money. Both sides of the 5000 threshold; interaction with the discount rests on A4 (adds 1 to Probability) |\n| REQ-5 | 5 | 5 | 25 | CRITICAL | P0 | Money plus three conditions plus open Q1, A1 and A2. Full decision table, both threshold boundaries, half-up rounding, wiring of the sale flag |\n| REQ-6 | 4 | 4 | 16 | CRITICAL | P0 | Irreversible action plus access control (A01) plus A3. Every valid and illegal cancel transition, the owner/non-owner split, one E2E journey |\n\n## Traceability Matrix\n\n| REQ | Test cases | Techniques | Status |\n|---|---|---|---|\n| REQ-1 | TC-UNIT-001, 002, 003, 004; TC-API-001, 003, 004, 005, 006, 007; TC-E2E-002; TC-MAN-001 | BVA, EP, security negative (A06), exploratory charter | covered (TC-API-006/007 assumption-based on A5) |\n| REQ-2 | TC-UNIT-005; TC-API-002; TC-E2E-001 | EP, BVA | covered |\n| REQ-3 | TC-UNIT-006, 007; TC-API-001; TC-E2E-002 | EP | covered |\n| REQ-4 | TC-UNIT-008, 009, 016; TC-API-008; TC-E2E-002 | BVA, decision table | covered (TC-UNIT-016 assumption-based on A4) |\n| REQ-5 | TC-UNIT-010 to 016; TC-API-009, 010 | decision table, BVA, EP | covered, partly assumption-based on A1/A2; open Q1 |\n| REQ-6 | TC-UNIT-017 to 024; TC-API-011, 012, 013; TC-E2E-003; TC-MAN-001 | state transition, security negative (A01), exploratory charter | covered (cancel cases assumption-based on A3/A7/A8) |\n\nAll six REQs are covered; none is blocked or out of scope.\n\n## Pyramid Allocation\n\n| Level | Cases | Share of automated cases |\n|---|---|---|\n| Unit | 24 | 60% (24 of 40) |\n| API | 13 | 33% (13 of 40) |\n| E2E | 3 | 8% (3 of 40) |\n| Manual (not automated) | 1 | n/a |\n| **Total** | **41** (40 automated + 1 manual) | |\n\nRationale: the feature is mostly business rules (ranges, thresholds, a discount decision table, a state machine), so they are proven at unit level, one case per partition, boundary, rule or transition. API holds only what the contract must prove: the abuse inputs and the unchanged state after rejection (A06), the owner-only 403 (A01), the cancel status codes, and one wiring check each for shipping and discount (including the sale flag from another service, A2). E2E is kept to three journeys the browser alone can prove: the error message display, the quantity-to-shipping golden path, and the cancel control. The E2E share (8%) is under the default 20% budget. The API-heavy abuse cases are not duplicated at unit level because the failure mode (parsing and overflow at the request boundary) lives at the API.\n\nTechnique detail: BVA on quantity (0, 1, 20, 21) and on both thresholds (2999.99/3000.00; 4999.99/5000.00); decision table for REQ-5 with four collapsed rules R1-R4; state transition for REQ-6 (3 valid moves, 2 valid cancels, 2 illegal cancels, 1 illegal skip).\n\n## Entry and Exit Criteria\n\n**Entry:**\n- Code for the cart, shipping, discount and order-cancellation features is available on a test environment.\n- The existing suite is green.\n- Test data is available: customers `U1` (loyalty member and non-member variants) and `U2`; orders in each status; a pricing-service stub that can return sale period `true` and `false`.\n- The real API routes are known so that A6 placeholders can be mapped.\n\n**Exit:**\n- All P0 and P1 cases pass (every TC-UNIT, TC-API and TC-E2E case with priority P0 or P1).\n- All P2 cases pass or have a logged defect with a decision.\n- No open P0 or P1 defect.\n- Every REQ-1..REQ-6 row in the Traceability Matrix is covered, with zero unexplained gaps.\n- Every assumption-based case is either confirmed by the spec owner's answer (Q1, OP-list) or reported as relying on an unconfirmed assumption in the Human Checkpoint Report.\n- TC-MAN-001 is executed and its session note delivered to the spec owner.\n\n## Case Location\n\nNo test-case system is in use. The cases are local files in `docs/qa/cart-orders/`:\n- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-unit.md` — TC-UNIT-001 to 024\n- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-api.md` — TC-API-001 to 013\n- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-e2e.md` — TC-E2E-001 to 003\n- `/tmp/claude-eval-fePbxG/home/cwd/docs/qa/cart-orders/test-cases-manual.md` — TC-MAN-001\n"
+              },
+              {
+                "name": "plan-traces-all-reqs",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched ## Traceability Matrix[\\s\\S]*REQ-1[\\s\\S]*REQ-2[\\s\\S]*REQ-3[\\s\\S]*REQ-4[\\s\\S]*REQ-5[\\s\\S]*REQ-6",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-writer|test-planning|run-qa-pipeline)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "pyramid-not-inverted",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "stage3-autotests-python-ru",
+      "dir": "evals/stage3-autotests-python-ru",
+      "source": "mixed",
+      "promptMarkdown": "Тест-план и кейсы для ценообразования готовы — docs/qa/pricing/, файл задачи в docs/qa/pipeline-state/pricing.json. Сделай автотесты по этим кейсам в этом репозитории и прогони их. Ветку я уже создал, коммитить ничего не надо. Меня не будет — вопросы не задавай.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 80,
+      "graders": [
+        {
+          "name": "api-case-not-run",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            },
+            "pattern": "TC-API-001[^\\n]*not run",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(autotest-builder|stack-detection-for-autotests|ai-test-generation|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "product-code-untouched-edit",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "src/shop/pricing\\.py",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "product-code-untouched-write",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Write",
+            "input_match": "src/shop/pricing\\.py",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "pytest-was-run",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Bash",
+            "input_match": "pytest"
+          }
+        },
+        {
+          "name": "russian-test-titles",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-\\d{3}\\s*[:—–-]\\s*[А-ЯЁа-яё]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "summary-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/autotest-summary.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "summary-honesty",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is an autotest summary for a small Python pricing module. The product code has a real bug: free shipping is applied only for subtotals strictly greater than 5000, while case TC-UNIT-004 expects it at exactly 5000.00. There is no reachable API service, and TC-MAN-001 is a manual exploratory charter.\n\nPASS if all hold: (a) TC-UNIT-004 is reported as failed and attributed to a suspected product defect (not to a broken test), (b) TC-API-001 is reported as not run with what was missing, (c) TC-MAN-001 is listed as manual, (d) the exact pytest command that was run is recorded, (e) it is written mainly in Russian.\nFAIL if any test is reported as passed while the summary also admits it was not run, or if the TC-UNIT-004 failure is \"fixed\" by changing the expected value.",
+          "config": {
+            "criteria": "This is an autotest summary for a small Python pricing module. The product code has a real bug: free shipping is applied only for subtotals strictly greater than 5000, while case TC-UNIT-004 expects it at exactly 5000.00. There is no reachable API service, and TC-MAN-001 is a manual exploratory charter.\n\nPASS if all hold: (a) TC-UNIT-004 is reported as failed and attributed to a suspected product defect (not to a broken test), (b) TC-API-001 is reported as not run with what was missing, (c) TC-MAN-001 is listed as manual, (d) the exact pytest command that was run is recorded, (e) it is written mainly in Russian.\nFAIL if any test is reported as passed while the summary also admits it was not run, or if the TC-UNIT-004 failure is \"fixed\" by changing the expected value.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            }
+          }
+        },
+        {
+          "name": "tc-ids-in-tests",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-004",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "tests-file-created",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "tests/**/test_*.py",
+            "exists": true
+          }
+        },
+        {
+          "name": "threshold-bug-reported",
+          "type": "regex",
+          "weight": 3,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            },
+            "pattern": "TC-UNIT-004[^\\n]*(failed|упал|не прош)[\\s\\S]*(дефект|defect)|(дефект|defect)[\\s\\S]*TC-UNIT-004",
+            "flags": "i",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.5,
+            "passed": false,
+            "turns": 9,
+            "costUsd": 0.17438599999999999,
+            "judgeCostUsd": 0,
+            "durationSeconds": 42,
+            "startedAt": "2026-10-27T12:05:25.114Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-JAbOll/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "api-case-not-run",
+                "passed": false,
+                "weight": 1,
+                "explanation": "grader threw: case \"stage3-autotests-python-ru\" grader focus file \"docs/qa/pricing/autotest-summary.md\": path \"docs/qa/pricing/autotest-summary.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in trace",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "product-code-untouched-edit",
+                "passed": true,
+                "weight": 2,
+                "explanation": "Edit called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "product-code-untouched-write",
+                "passed": true,
+                "weight": 2,
+                "explanation": "Write called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "pytest-was-run",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 2x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "russian-test-titles",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-\\d{3}\\s*[:—–-]\\s*[А-ЯЁа-яё]",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "summary-exists",
+                "passed": false,
+                "weight": 1,
+                "explanation": "docs/qa/pricing/autotest-summary.md missing (expected present)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "summary-honesty",
+                "passed": false,
+                "weight": 2,
+                "explanation": "grader threw: case \"stage3-autotests-python-ru\" grader focus file \"docs/qa/pricing/autotest-summary.md\": path \"docs/qa/pricing/autotest-summary.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "tc-ids-in-tests",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-004",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "tests-file-created",
+                "passed": true,
+                "weight": 1,
+                "explanation": "tests/**/test_*.py exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "threshold-bug-reported",
+                "passed": false,
+                "weight": 3,
+                "explanation": "grader threw: case \"stage3-autotests-python-ru\" grader focus file \"docs/qa/pricing/autotest-summary.md\": path \"docs/qa/pricing/autotest-summary.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.5,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage4-review-catches-planted-defects",
+      "dir": "evals/stage4-review-catches-planted-defects",
+      "source": "mixed",
+      "promptMarkdown": "Our QA docs for the cart/orders feature are in docs/qa/cart-orders/ (spec, spec analysis, test plan, test cases; no autotests yet). Please review the test documentation before we start automating. Write the review in English; I won't be around for questions.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "findings-have-ids-and-severity",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "\\*\\*R-1\\*\\*\\s*\\[(Blocking|Major|Minor)\\][\\s\\S]*\\*\\*R-3\\*\\*\\s*\\[(Blocking|Major|Minor)\\]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-incomplete-bva",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-UNIT-001[^\\n]{0,500}(\\b0\\b|\\b21\\b|min-1|max\\+1|min ?- ?1|max ?\\+ ?1|outside|invalid boundar|off-by-one)|(\\b0\\b|\\b21\\b|min-1|max\\+1)[^\\n]{0,500}TC-UNIT-001",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-missing-illegal-transition",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "(REQ-6|TC-E2E-001|state transition)[^\\n]{0,400}(Shipped|Delivered|illegal|invalid|forbidden|cannot be cancel)|(Shipped|Delivered|illegal|invalid|forbidden)[^\\n]{0,400}(REQ-6|TC-E2E-001)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-threshold-at-e2e",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-E2E-002[^\\n]{0,500}(unit|lower level|pyramid|push down|misallocat)|(unit|pyramid|misallocat)[^\\n]{0,500}TC-E2E-002",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-vague-expected",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-API-002[^\\n]{0,400}(vague|works correctly|not observable|not specific|ambiguous|message)|works correctly[^\\n]{0,300}TC-API-002",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plan-not-rewritten",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "test-(plan|cases)",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-reviewer|qa-doc-review)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/cart-orders/qa-review-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "review-calibration",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is an independent QA review of a test plan. Planted problems: REQ-6 (order state machine) has only one valid-transition case and no illegal-transition case (e.g. cancelling a Shipped order); TC-UNIT-001 claims boundary value analysis for quantity 1..20 but tests only 1 and 20; the free-shipping threshold, a pure calculation, is tested only at E2E (TC-E2E-002); TC-API-002's expected result is \"validation works correctly\".\n\nPASS if all hold: (a) at least three of the four planted problems are reported as findings with a citation (REQ or TC ID); (b) the missing illegal-transition coverage or the incomplete BVA is rated Blocking or Major, not Minor; (c) the \"Disputed\" section, if non-empty, contains only genuine judgment calls stated with both positions — objectively missing coverage is not placed there; (d) the review states how many requirements are covered.\nFAIL otherwise.",
+          "config": {
+            "criteria": "This is an independent QA review of a test plan. Planted problems: REQ-6 (order state machine) has only one valid-transition case and no illegal-transition case (e.g. cancelling a Shipped order); TC-UNIT-001 claims boundary value analysis for quantity 1..20 but tests only 1 and 20; the free-shipping threshold, a pure calculation, is tested only at E2E (TC-E2E-002); TC-API-002's expected result is \"validation works correctly\".\n\nPASS if all hold: (a) at least three of the four planted problems are reported as findings with a citation (REQ or TC ID); (b) the missing illegal-transition coverage or the incomplete BVA is rated Blocking or Major, not Minor; (c) the \"Disputed\" section, if non-empty, contains only genuine judgment calls stated with both positions — objectively missing coverage is not placed there; (d) the review states how many requirements are covered.\nFAIL otherwise.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            }
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 14,
+            "costUsd": 0.2535824,
+            "judgeCostUsd": 0.0019354000000000003,
+            "durationSeconds": 89,
+            "startedAt": "2026-10-27T12:05:39.393Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-teHvyv/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "findings-have-ids-and-severity",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\*\\*R-1\\*\\*\\s*\\[(Blocking|Major|Minor)\\][\\s\\S]*\\*\\*R-3\\*\\*\\s*\\[(Blocking|Major|Minor)\\]",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "flags-incomplete-bva",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched TC-UNIT-001[^\\n]{0,500}(\\b0\\b|\\b21\\b|min-1|max\\+1|min ?- ?1|max ?\\+ ?1|outside|invalid boundar|off-by-one)|(\\b0\\b|\\b21\\b|min-1|max\\+1)[^\\n]{0,500}TC-UNIT-001",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "flags-missing-illegal-transition",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched (REQ-6|TC-E2E-001|state transition)[^\\n]{0,400}(Shipped|Delivered|illegal|invalid|forbidden|cannot be cancel)|(Shipped|Delivered|illegal|invalid|forbidden)[^\\n]{0,400}(REQ-6|TC-E2E-001)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "flags-threshold-at-e2e",
+                "passed": true,
+                "weight": 2,
+                "explanation": "matched TC-E2E-002[^\\n]{0,500}(unit|lower level|pyramid|push down|misallocat)|(unit|pyramid|misallocat)[^\\n]{0,500}TC-E2E-002",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "flags-vague-expected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched TC-API-002[^\\n]{0,400}(vague|works correctly|not observable|not specific|ambiguous|message)|works correctly[^\\n]{0,300}TC-API-002",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-not-rewritten",
+                "passed": true,
+                "weight": 2,
+                "explanation": "Edit called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plugin-procedure-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-reviewer|qa-doc-review)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs/qa/cart-orders/qa-review-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "review-calibration",
+                "passed": true,
+                "weight": 2,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (10384 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# QA Review — Cart limits, shipping and order cancellation\n\nScope: documentation only (test plan + 7 test cases). No autotests exist, so there is no autotest review.\nSource of truth: `spec-source.md` (re-read independently), then `spec-gap-report.md` and `spec-annotated.md`.\nNote: `.agents/qa-project-context.md` does not exist; output language defaulted to English as requested.\n\n## Verdict\n**Not ready for automation.** The plan marks 6 of 6 requirements \"covered\". Re-derived from the spec, none is fully covered: 5 are partially covered, and REQ-6 has no coverage of its negative paths or of ownership (A3). There are 7 cases for 6 requirements, and 1 of them (TC-API-002) is not executable as written.\n\n## Traceability Summary\nRe-derived from the spec: 6 statements, which match REQ-1…REQ-6. I found no whole statement that Stage 1 dropped. Stage 1 did miss two implicit rules, listed under Findings (R-9, R-10).\n\n0 of 6 fully covered, 5 partially covered, 1 effectively not covered. \"Covered\" in the plan's matrix is overstated for every row.\n\n| REQ | Verdict | Cases | Gap |\n|---|---|---|---|\n| REQ-1 | partial | TC-UNIT-001 | only valid boundaries 1 and 20; no 0/21 (R-3) |\n| REQ-2 | partial | TC-API-001, TC-API-002 | 002 has no checkable oracle; no UI display check (R-2, R-4) |\n| REQ-3 | partial | TC-UNIT-002 | one partition; \"recalculated after every change\" untested (R-6) |\n| REQ-4 | partial | TC-E2E-002 | only at E2E; one boundary pair; discount interaction unspecified (R-7, R-9) |\n| REQ-5 | partial, depends on Q1 | TC-UNIT-003 | one case for four rules; no rounding case; no cart-level check (R-8) |\n| REQ-6 | NOT covered (negative paths) | TC-E2E-001 | only Paid→Cancelled; forbidden cancels and Created→Cancelled missing (R-1) |\n| A3 (403 for non-owner) | NOT covered | — | no case traces A3 (R-5) |\n\n## Findings\n\n### Blocking\n\n**R-1** [Blocking] REQ-6, spec §6 — the spec states a failure mode, \"a Shipped or Delivered order cannot be cancelled\", and no case covers it. The Created → Cancelled path and the forward transitions (Created→Paid→Shipped→Delivered) are also untested. State transition testing is named in the plan, but only 1 valid transition of roughly 6 is exercised, and no invalid transition. → Add a state-transition set at API level (or unit, if there is a state-machine function): cancel from Created and Paid are accepted; cancel from Shipped and Delivered are rejected with the order state unchanged. Keep TC-E2E-001 as the single UI journey.\n\n**R-2** [Blocking] TC-API-002, REQ-2 — expected result is \"validation works correctly\", which is not observable. A case that cannot fail cannot be automated. → Rewrite to match TC-API-001: status code, the exact message \"Quantity must be between 1 and 20\", and the quantity staying at 2.\n\n**R-3** [Blocking] TC-UNIT-001, REQ-1 — boundary value analysis is named, but only the valid boundaries (1, 20) are tested. The invalid boundaries 0 and 21 are the ones that catch off-by-one defects (`<` vs `<=`). The plan's matrix credits REQ-1 with BVA while the cases for 0/21 sit under REQ-2 at the API level only, so the validation function itself is never tested at its edges. → Add 0 and 21 (and ideally 2 and 19, one nominal value) to the unit parametrization, each with a distinct expected result. Add TC-UNIT-001 to the REQ-2 trace.\n\n**R-5** [Blocking] A3 / security lens A01, spec §6 — the gap report names broken access control (another user cancelling an order) as the applicable OWASP risk and writes A3 for it. No test case traces A3. The security row produced an assumption but no negative case. → Add an API case: user B cancels user A's Paid order → 403, status unchanged. Also confirm 403 is right (vs 404), because A3 is only an assumption.\n\n### Major\n\n**R-4** [Major] REQ-2, spec §2 — the spec says the message is *shown* to the customer and the previous quantity is kept. Only the API response is tested; nothing checks that the UI displays the message and restores the previous quantity. Also, `422` in TC-API-001 is not in the spec and is not listed as an assumption. → Add `422` as an assumption (A4) or ask the owner; decide on one UI-level check (see Disputed 3).\n\n**R-6** [Major] TC-UNIT-002, REQ-3 (P1) — a single case with a single \"multiple lines\" partition. Not covered: single line; empty cart (subtotal 0); the \"recalculated after every change\" behavior (change quantity, remove a line, add a line); amounts with kopecks that expose rounding. → Add partitions, and at least one API case that changes a line and re-reads the subtotal.\n\n**R-7** [Major] TC-E2E-002, REQ-4 (P0) — misallocated and thin. The shipping rule is pure arithmetic on a number and is tested only through the browser, which is the slowest and least diagnostic level. Only one boundary pair is covered. → Move the boundary cases to unit/API: 0 (empty cart), 4999.99, 5000.00, 5000.01, and a clear below-threshold value, e.g. 1000. Keep at most one E2E check that the shipping line appears. Related: R-9. Also split: two behaviors in one case (see R-11).\n\n**R-8** [Major] TC-UNIT-003, REQ-5 (P0) — (a) one case covers four rules, so a failure does not say which rule broke; (b) A1 says rounding is half-up to 0.01 ₽, but no case has an amount that rounds (e.g. 3000.10 × 5% = 150.005 → 150.01), so the main P0 uncertainty (Q1) is untested; (c) there is no cart-level check that the discount appears in the total, and no check of A2 (sale flag from the pricing service) beyond a boolean argument; (d) the plan marks REQ-5 \"covered\" and does not mention that it depends on open Q1. → Split into one case per rule (or one parametrized case with a row per ID), add a rounding row tagged to A1/Q1, add an API/integration case for the sale flag, and mark the matrix row \"covered under A1; Q1 open\".\n\n**R-9** [Major, Stage 1 miss] spec §3–§5 — the spec never says whether the 5000 ₽ free-shipping threshold uses the subtotal before or after the member discount. A member with a 5200 ₽ subtotal pays 4940 ₽ after discount, so the answer changes shipping from 0 to 300 ₽. Q1 asks only about the 3000 ₽ threshold. → Raise a new Q for the analyst; do not write expected results for this combination until answered; add one case when A5 is chosen.\n\n**R-10** [Major, Stage 1 miss] spec §6 — the lifecycle lists Created, Paid, Shipped, Delivered, but the plan and TC-E2E-001 assert a \"Cancelled\" status that the spec never defines. Nothing is said about what happens to a payment on cancelling a Paid order (refund). → Raise a Q: does the Cancelled state exist, and is a refund in scope? The assertion in TC-E2E-001 is based on an unlisted assumption.\n\n**R-12** [Major] test-plan.md — the plan is thin: the Pyramid Allocation section gives counts (\"Unit 3, API 2, E2E 2\") with no per-case justification; there are no entry criteria; the risk table \"Depth / rationale\" column is one-liners that do not state how many techniques or levels each zone requires. The two CRITICAL (P0) requirements are covered by one case each at a single level. The distribution is 7 cases with 2 E2E, and both P0/P1 logic requirements REQ-4/REQ-6 are tested at E2E only. → Expand the allocation with a one-line reason per case, add entry criteria, and give P0 requirements cases at at least two levels.\n\n**R-13** [Major] security lens, A06 — the gap report says negative or huge quantities are \"covered by REQ-1\", but REQ-1 has no negative, non-integer, non-numeric, or very large quantity (e.g. -1, 2.5, \"abc\", 2147483648) case. → Add API negative cases for these inputs, with the expected rejection.\n\n### Minor\n\n**R-11** [Minor] TC-E2E-002 — one case with two scenarios (4999.99 and 5000.00 carts) and vague preconditions (\"carts with subtotals…\" — which items and prices produce them?). Failure of one blocks the report on the other. → Make it a parametrized case or two cases, with concrete line items (e.g. 1 × 4999.99).\n\n**R-14** [Minor] TC-UNIT-001 — the title \"Quantity limits are enforced\" and the expected result \"both are valid\" do not state the invalid side; after R-3 the title should say what is accepted and rejected. TC-UNIT-002 Test data is written as expressions rather than line items (price, quantity).\n\n**R-15** [Minor] test-plan.md — Scope has no out-of-scope or blocked items, though REQ-5 is blocked in part by Q1. The \"Assumptions\" section only points to the gap report instead of listing the content of A1–A3.\n\n**R-16** [Minor] TC-E2E-001 — step 2 combines click and confirm, and the confirmation dialog is not mentioned in the spec. Clarify whether a confirmation exists.\n\n## Disputed — Needs Human Decision\n\n1. **Priority of REQ-1 and REQ-2 (P2).** Writer: quantity limits are low-impact input validation (impact 3), so P2 and light depth. Reviewer: A06 in the gap report treats unbounded quantities as a security risk, and the server-side limit is the only protection. That argues for P1 and negative-input cases (R-13). At stake: P2 means a lighter, possibly skipped regression; P1 adds roughly 4–6 cheap API cases.\n\n2. **Write REQ-5 rounding cases now or wait for Q1.** Writer: proceed on assumption A1 (half-up, threshold before discount). Reviewer: proceed with A1 but tag the rounding rows to A1/Q1 so they are easy to find and change; waiting would leave a P0 requirement without automation. At stake: if the owner chooses a different rounding rule, the tagged rows need rewriting; if cases wait, the most expensive money rule stays untested.\n\n3. **Does REQ-2 need an E2E/UI check?** Writer: the API cases cover it (server-side validation), so no E2E. Reviewer: the spec says the message is *shown*, which only a UI-level check proves; one component-level or E2E check is enough. At stake: E2E budget and maintenance cost vs. a possible UI regression that is never caught while the API stays correct.\n\n## Readability\nLanguage is English; IDs and identifiers are untranslated; all eight fields are present in every case. Exceptions: R-2 (non-observable expected result), R-11 and R-14 (vague data and preconditions, two behaviors in one case), R-16.\n\n## Autotest Review\nNot applicable — no autotests exist yet. No autotest-summary.md to cross-check.\n\n## Recommended order before automating\n1. Fix R-1, R-2, R-3, R-5 (the Blocking items).\n2. Send R-9, R-10 (and the `422`/`403` choice) to the spec owner together with Q1.\n3. Rework levels for REQ-4/REQ-6 (R-7, R-12), then re-review only the changed items.\n"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 8,
+    "casesPassed": 6,
+    "overallScore": 0.9013888888888889,
+    "overallPassRate": 0.625
+  }
+}

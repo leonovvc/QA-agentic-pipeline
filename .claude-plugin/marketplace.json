@@ -1,0 +1,19 @@
+{
+  "name": "leonovvc-qa",
+  "owner": {
+    "name": "Vladislav Leonov",
+    "url": "https://github.com/leonovvc"
+  },
+  "metadata": {
+    "description": "QA tooling for Claude Code by Vladislav Leonov."
+  },
+  "plugins": [
+    {
+      "name": "qa-agentic-pipeline",
+      "source": "./",
+      "description": "Spec → gap report → risk-based test plan → pyramid-split test cases → autotests → independent review, with one human checkpoint. English or Russian output.",
+      "version": "1.0.0",
+      "category": "testing"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "case": "orchestration-blocks-on-empty-spec",
+  "artifacts": [
+    "docs/qa/next-gen-loyalty-experience-d4a1cd/checkpoint.md",
+    "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-annotated.md",
+    "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-gap-report.md",
+    "docs/qa/next-gen-loyalty-experience-d4a1cd/spec-source.md",
+    "docs/qa/pipeline-state/board.md",
+    "docs/qa/pipeline-state/next-gen-loyalty-experience-d4a1cd.json"
+  ],
+  "tool_calls": {
+    "Skill": 1,
+    "Bash": 5,
+    "Read": 5,
+    "Agent": 1,
+    "Glob": 2,
+    "Write": 7,
+    "Grep": 2,
+    "Edit": 1
+  },
+  "task_dirs": {
+    "next-gen-loyalty-experience-d4a1cd": {
+      "contract_checks_total": 25,
+      "contract_checks_failed": 1,
+      "failed_checks": [
+        "[stage 1] requirements inventory has REQ rows (0 REQs)"
+      ]
+    }
+  },
+  "agents_dispatched": [
+    "qa-agentic-pipeline:spec-analyst"
+  ],
+  "skills_invoked": [
+    "qa-agentic-pipeline:run-qa-pipeline"
+  ]
+}

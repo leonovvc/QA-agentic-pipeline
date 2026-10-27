@@ -1,0 +1,30 @@
+{
+  "case": "stage3-autotests-python-ru",
+  "artifacts": [
+    "docs/qa/pipeline-state/pricing.json",
+    "docs/qa/pricing/spec-annotated.md",
+    "docs/qa/pricing/spec-gap-report.md",
+    "docs/qa/pricing/spec-source.md",
+    "docs/qa/pricing/test-cases-api.md",
+    "docs/qa/pricing/test-cases-manual.md",
+    "docs/qa/pricing/test-cases-unit.md",
+    "docs/qa/pricing/test-plan.md",
+    "tests/conftest.py",
+    "tests/test_cart_api.py",
+    "tests/test_cart_lines.py",
+    "tests/test_pricing_rules.py"
+  ],
+  "tool_calls": {
+    "Bash": 6,
+    "Write": 2
+  },
+  "task_dirs": {
+    "pricing": {
+      "contract_checks_total": 53,
+      "contract_checks_failed": 0,
+      "failed_checks": []
+    }
+  },
+  "agents_dispatched": [],
+  "skills_invoked": []
+}

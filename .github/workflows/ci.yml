@@ -1,0 +1,48 @@
+name: CI
+
+# Free, deterministic checks on every push and PR: no model calls, no secrets.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  static:
+    name: Static validation and contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tooling
+        run: pip install pyyaml pytest
+
+      - name: Validate plugin structure and cross-references
+        run: python tools/validate_plugin.py
+
+      - name: Artifact-contract checker and validator tests
+        run: python -m pytest -v
+
+      - name: Golden pipeline outputs conform to the contract
+        run: |
+          python tools/check_artifacts.py tests/fixtures/golden-en --state tests/fixtures/golden-en/state.json
+          python tools/check_artifacts.py tests/fixtures/golden-ru --lang ru
+
+      - name: Recorded eval runs still conform to the contract
+        run: python tools/verify_recorded_runs.py
+
+  official-validator:
+    name: claude plugin validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Validate manifest, marketplace, skills, and agents
+        run: claude plugin validate .

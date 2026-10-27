@@ -1,0 +1,33 @@
+{
+  "case": "stage2-test-design-from-gap-report",
+  "artifacts": [
+    "docs/qa/cart-orders/spec-annotated.md",
+    "docs/qa/cart-orders/spec-gap-report.md",
+    "docs/qa/cart-orders/spec-source.md",
+    "docs/qa/cart-orders/test-cases-api.md",
+    "docs/qa/cart-orders/test-cases-e2e.md",
+    "docs/qa/cart-orders/test-cases-manual.md",
+    "docs/qa/cart-orders/test-cases-unit.md",
+    "docs/qa/cart-orders/test-plan.md",
+    "docs/qa/pipeline-state/cart-orders.json"
+  ],
+  "tool_calls": {
+    "Bash": 2,
+    "Read": 10,
+    "Agent": 1,
+    "Grep": 1,
+    "Write": 6,
+    "Edit": 3
+  },
+  "task_dirs": {
+    "cart-orders": {
+      "contract_checks_total": 55,
+      "contract_checks_failed": 0,
+      "failed_checks": []
+    }
+  },
+  "agents_dispatched": [
+    "qa-agentic-pipeline:qa-doc-writer"
+  ],
+  "skills_invoked": []
+}
