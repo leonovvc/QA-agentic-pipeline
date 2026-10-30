@@ -105,6 +105,17 @@ What the run changed in the plugin: Stage 3 trigger descriptions (`autotest-buil
 in the suite: two grader fixes (footnote ¹). Notable expected failures in the contract
 column: the Stage 4 fixture keeps its planted vague expected result, and a `BLOCKED` spec
 has, by definition, an empty requirements inventory.
+
+#### Re-run 2026-10-30 — Stage 3 after the trigger fix
+
+[`eval-results/2026-10-30-stage3-rerun`](../eval-results/2026-10-30-stage3-rerun):
+score **1.00** (was 0.50), $0.36. The request "сделай автотесты по этим кейсам" now
+dispatches `qa-agentic-pipeline:autotest-builder`, which extended `tests/` with
+`test_pricing_rules.py` and `test_cart_api.py`, ran pytest, reported TC-UNIT-004 as a
+suspected product defect (expected 0.00 at exactly 5000.00, got 300.00 — the planted
+`>` instead of `>=`), marked TC-API-001 `not run` (no `CART_API_URL`), left TC-MAN-001
+manual, set Stage 3 to `done` in the task file, and did not touch `src/`. Contract
+conformance of the produced docs: 60/60.
 <!-- EVAL-DETAILS:END -->
 
 ### Running the suite

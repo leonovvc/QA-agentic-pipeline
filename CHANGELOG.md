@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] — 2026-10-30
+
+### Added
+- `docs/methodology.md` / `docs/methodology.ru.md`: risk-based P0–P3 priorities, boundary
+  value analysis, decision tables, state transitions, and how the planted-defect evals
+  work — illustrated with artifacts from the recorded run.
+- Recorded Stage 3 re-run (`eval-results/2026-10-30-stage3-rerun`): 1.00, up from 0.50.
+
+### Fixed
+- README eval table: the recorded Stage 1 promo run had 23 requirements and 28 questions
+  (25 and 22 were from an earlier trial run).
+
 ## [1.0.0] — 2026-10-27
 
 First public release.

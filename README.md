@@ -91,7 +91,7 @@ autotest summary, review report, and a **checkpoint** listing what needs your de
 Tests land in your repo's own test directories. If the session drops: *"Resume the QA
 pipeline."*
 
-➡ [Getting started](docs/getting-started.md) · [How each stage works](docs/pipeline.md) ·
+➡ [Getting started](docs/getting-started.md) · [Methodology: risk, BVA, decision tables, evals](docs/methodology.md) · [How each stage works](docs/pipeline.md) ·
 [Architecture and design decisions](docs/architecture.md) · [Skills catalogue](docs/skills.md)
 
 ## Evidence that it works
@@ -110,10 +110,10 @@ Three layers, from free and deterministic to real model runs. Details and how to
 
 | Case | Grader score | Independent check |
 |---|---|---|
-| Stage 1 — EN promo spec, 8 planted defects | 0.93 → 1.00 after grader fix ¹ | **8 / 8** defects found · 25 REQs · contract 13/14 ² |
+| Stage 1 — EN promo spec, 8 planted defects | 0.93 → 1.00 after grader fix ¹ | **8 / 8** defects found · 23 REQs, 28 questions · contract 13/14 ² |
 | Stage 1 — RU password reset, security lens | **1.00** | **6 / 6** defects found · contract 14/14 |
 | Stage 2 — test design from a gap report | **1.00** | 41 cases, all 6 REQs traced · contract 55/55 |
-| Stage 3 — pytest repo with a planted bug (RU) | 0.50 ³ | tests correct, bug reported as product defect; plugin not invoked |
+| Stage 3 — pytest repo with a planted bug (RU) | 0.50 → **1.00** after fix ³ | `autotest-builder` dispatched · bug reported as product defect · contract 60/60 |
 | Stage 4 — review with 4 planted doc defects | **1.00** | all 4 found with citations |
 | Resume after an interrupted Stage 3 | 0.78 → 1.00 after grader fix ¹ | stages 1–2 untouched · contract 69/69 |
 | Blocks on a spec with no requirements | **1.00** | task `BLOCKED`, no plan written |
@@ -121,7 +121,7 @@ Three layers, from free and deterministic to real model runs. Details and how to
 
 ¹ Grader false negatives found while reading the transcripts (a too-narrow regex; an `input_match` that matched file *content* instead of the path) — fixed in `evals/`; the recorded artifacts show the agents' behaviour was correct.
 ² The agent logged 20 assumptions but marked none inline in the annotated spec — a real, minor contract deviation the checker caught.
-³ **A real defect found by the evals:** asked "make autotests for these cases", Claude wrote correct tests itself instead of dispatching `autotest-builder`, so no `autotest-summary.md` or task-state update. Agent and skill trigger descriptions were fixed in response; re-run pending.
+³ **A real defect found by the evals:** asked "make autotests for these cases", Claude wrote correct tests itself instead of dispatching `autotest-builder`, so no `autotest-summary.md` or task-state update. Agent and skill trigger descriptions were fixed; the [re-run on 2026-10-30](eval-results/2026-10-30-stage3-rerun) dispatched `autotest-builder` and scored 1.00.
 <!-- EVAL-RESULTS:END -->
 
 ## Repository layout

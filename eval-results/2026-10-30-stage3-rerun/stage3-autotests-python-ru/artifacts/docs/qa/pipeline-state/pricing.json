@@ -1,0 +1,21 @@
+{
+  "task_id": "pricing",
+  "title": "Ценообразование корзины",
+  "source": {"type": "text", "value": "docs/qa/pricing/spec-source.md"},
+  "target_repo": ".",
+  "output_language": "ru",
+  "docs_dir": "docs/qa/pricing",
+  "status": "IN_PROGRESS",
+  "created_at": "2026-10-30T04:53:34Z",
+  "updated_at": "2026-10-30T04:53:34Z",
+  "stages": [
+    {"stage": 1, "agent": "spec-analyst", "status": "done", "started_at": "2026-10-30T04:53:34Z", "completed_at": "2026-10-30T04:53:34Z", "output": ["docs/qa/pricing/spec-source.md", "docs/qa/pricing/spec-gap-report.md", "docs/qa/pricing/spec-annotated.md"]},
+    {"stage": 2, "agent": "qa-doc-writer", "status": "done", "started_at": "2026-10-30T04:53:34Z", "completed_at": "2026-10-30T04:53:34Z",
+     "output": ["docs/qa/pricing/test-plan.md", "docs/qa/pricing/test-cases-unit.md", "docs/qa/pricing/test-cases-api.md", "docs/qa/pricing/test-cases-manual.md"]},
+    {"stage": 3, "agent": "autotest-builder", "status": "done", "started_at": "2026-10-30T05:00:00Z", "completed_at": "2026-10-30T05:10:00Z", "output": ["docs/qa/pricing/autotest-summary.md", "tests/test_pricing_rules.py", "tests/test_cart_api.py"]},
+    {"stage": 4, "agent": "qa-doc-reviewer", "status": "pending", "started_at": null, "completed_at": null, "output": null}
+  ],
+  "assumptions_log": ["A1", "A2", "A3", "A4"],
+  "disputed_items": [],
+  "history": [{"at": "2026-10-30T04:53:34Z", "event": "task_created"}, {"at": "2026-10-30T05:10:00Z", "event": "stage_3_done: 12 passed, 1 failed (TC-UNIT-004, suspected product defect), 1 skipped (TC-API-001, no CART_API_URL)"}]
+}

@@ -12,7 +12,7 @@
       "name": "qa-agentic-pipeline",
       "source": "./",
       "description": "Spec → gap report → risk-based test plan → pyramid-split test cases → autotests → independent review, with one human checkpoint. English or Russian output.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "testing"
     }
   ]

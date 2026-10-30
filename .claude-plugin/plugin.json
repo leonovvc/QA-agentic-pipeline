@@ -1,6 +1,6 @@
 {
   "name": "qa-agentic-pipeline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Agentic QA pipeline for Claude Code: four agents turn a spec (URL, text, or PDF) into a gap report with a numbered requirements inventory, a risk-based test plan, test cases split by pyramid level, autotests in your repo's own stack, and an independent review — with one human checkpoint for disputed calls. Output in English or Russian. Progress persists to a Jira-style task file, so a dropped session resumes where it stopped.",
   "author": {
     "name": "Vladislav Leonov",
