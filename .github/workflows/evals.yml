@@ -32,28 +32,52 @@ jobs:
           sudo apt-get update && sudo apt-get install -y bubblewrap socat
           pip install pyyaml pytest
       - name: Run eval suite
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EVAL_TAG: ${{ inputs.tag }}
+          EVAL_RUNS: ${{ inputs.runs }}
         run: |
-          TAG_ARGS=""
-          if [ -n "${{ inputs.tag }}" ]; then TAG_ARGS="--tag ${{ inputs.tag }}"; fi
-          claude plugin eval . $TAG_ARGS \
+          if [[ -z "$ANTHROPIC_API_KEY" ]]; then
+            echo "::error::Set the ANTHROPIC_API_KEY repository secret before running Behavioral evals."
+            exit 1
+          fi
+          export TMPDIR="$RUNNER_TEMP/qa-evals"
+          mkdir -p "$TMPDIR"
+          tag_args=()
+          if [[ -n "$EVAL_TAG" ]]; then tag_args=(--tag "$EVAL_TAG"); fi
+          claude plugin eval . "${tag_args[@]}" \
             --trust-plugin \
             --scaffold \
             --allow-tools Write Edit "Bash(python3 *)" "Bash(python *)" "Bash(pytest *)" "Bash(mkdir *)" "Bash(date *)" "Bash(ls *)" \
-            --runs ${{ inputs.runs }} \
+            --runs "$EVAL_RUNS" \
             --ablation none \
             --threshold 0.8 \
             --model claude-sonnet-5-5 \
             --judge-model claude-sonnet-5-5 \
             --no-publish \
             --keep-temp \
-            --json evals-result.json \
+            --output-dir evals/results/run \
             --max-cost-usd 40
+      - name: Collect workspace artifacts and independent scores
+        if: always()
+        shell: bash
+        run: |
+          if [[ ! -f evals/results/run/aggregate-result.json ]]; then exit 0; fi
+          shopt -s nullglob
+          kept=("$RUNNER_TEMP"/qa-evals/claude-eval-*)
+          if (( ${#kept[@]} == 0 )); then
+            echo "::error::The eval harness did not retain any case workspaces."
+            exit 1
+          fi
+          python tools/collect_eval_run.py --results evals/results/run \
+            --kept "${kept[@]}" --run-id "actions-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: eval-results
           path: |
-            evals-result.json
-            evals/results/
+            evals/results/run/aggregate-result.json
+            evals/results/run/report.html
+            eval-results/actions-${{ github.run_id }}-${{ github.run_attempt }}/
+            !eval-results/**/trace.jsonl

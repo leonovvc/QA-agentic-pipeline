@@ -72,6 +72,7 @@ explicit PASS/FAIL conditions.
 | `stage3-autotests-python-ru` | 3 | A pytest repo with an existing suite and a **planted product bug** (`>` instead of `>=` for free shipping); RU cases | Tests extend `tests/`, carry `TC-UNIT-…` IDs and Russian titles, are run with pytest; the boundary failure is reported as a suspected product defect; `src/` untouched; the API case `not run` with the reason |
 | `stage4-review-catches-planted-defects` | 4 | A complete-looking plan with **4 planted defects**: REQ-6 has no illegal-transition case, BVA without `min-1/max+1`, a pure calculation tested only at E2E, a vague expected result | Each defect reported with a citation and a severity; nothing rewritten; Disputed used only for real judgment calls |
 | `orchestration-resume-interrupted-stage3` | 3–4 | Task file with stages 1–2 done and stage 3 interrupted, plus a half-written test file | Stages 1–2 never rewritten; stage 3 redone whole; stage 4 run; `IN_REVIEW`; checkpoint written |
+| `orchestration-fresh-pricing` | 1–4 | Only the cart pricing spec and the pytest project, with the planted free-shipping bug | Four agents dispatched in order; new QA artifacts and state; pytest exposes the 5000 ₽ boundary failure; Russian checkpoint at `IN_REVIEW` |
 | `routing-concept-question-no-pipeline` | routing | "What's the difference between EP and BVA?" | A short correct answer; no agents, no pipeline, no files |
 
 ### Recall against ground truth
@@ -116,6 +117,20 @@ suspected product defect (expected 0.00 at exactly 5000.00, got 300.00 — the p
 `>` instead of `>=`), marked TC-API-001 `not run` (no `CART_API_URL`), left TC-MAN-001
 manual, set Stage 3 to `done` in the task file, and did not touch `src/`. Contract
 conformance of the produced docs: 60/60.
+
+#### Результаты локальной проверки — 11 ноября 2026
+
+На Windows статический валидатор прошёл 1558 из 1558 проверок, pytest — 42 из 42.
+Эталонные артефакты на английском и русском прошли 69 из 69 и 39 из 39 проверок
+контракта соответственно. Все девять сохранённых результатов пересчитаны и совпали
+с опубликованными значениями.
+
+В начальном окружении `orchestration-fresh-pricing` были только ТЗ, код продукта
+и два проходящих теста. При повторном запуске сохранённых тестов Stage 3 от
+30 октября 2026 года прошли 12 тестов, один пропущен из-за отсутствия
+`CART_API_URL`, один выявил заложенный дефект: при сумме ровно 5000 ₽
+доставка стоит 300 ₽ вместо 0 ₽. Полный прогон девяти eval-кейсов с моделью
+ещё не выполнен.
 <!-- EVAL-DETAILS:END -->
 
 ### Running the suite
@@ -139,7 +154,14 @@ timestamps; every command runs inside Claude Code's OS-level sandbox, confined t
 workspace. `--ablation none` skips the no-plugin baseline: without the plugin there is no
 pipeline, artifact contract, or task file to grade, so the baseline would mostly measure
 the graders. The GitHub Actions workflow `Behavioral evals` runs the same command on
-demand with an `ANTHROPIC_API_KEY` secret.
+demand with an `ANTHROPIC_API_KEY` secret. Leave `tag` empty and set `runs` to `1`
+to cover the whole suite once. Download the workflow's `eval-results` artifact
+and retain the collected `actions-<run-id>-<attempt>` directory under
+`eval-results/`. Verify it with `python tools/verify_recorded_runs.py` before
+adding a results entry above. The workflow upload excludes raw transcripts.
+
+On Windows, run the shell-enabled suite from WSL2 or use the GitHub Actions
+workflow. The native Windows harness cannot grant Bash to eval agents.
 
 ### Limitations
 
