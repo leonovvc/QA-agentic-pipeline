@@ -1,6 +1,6 @@
 [project]
 name = "qa-agentic-pipeline-tools"
-version = "1.0.0"
+version = "1.1.0"
 description = "Static validation and artifact-contract checks for the qa-agentic-pipeline Claude Code plugin"
 requires-python = ">=3.10"
 dependencies = ["pyyaml>=6"]

@@ -94,8 +94,8 @@ def main() -> int:
     ap.add_argument("ground_truth", type=Path)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    truth = yaml.safe_load(args.ground_truth.read_text())
-    result = score(args.report.read_text(), truth)
+    truth = yaml.safe_load(args.ground_truth.read_text(encoding="utf-8"))
+    result = score(args.report.read_text(encoding="utf-8"), truth)
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:

@@ -1,0 +1,79 @@
+{
+  "case": "stage3-greenfield-no-tests-ru",
+  "artifacts": [
+    "docs\\qa\\pipeline-state\\pricing.json",
+    "docs\\qa\\pricing\\autotest-summary.md",
+    "docs\\qa\\pricing\\spec-annotated.md",
+    "docs\\qa\\pricing\\spec-gap-report.md",
+    "docs\\qa\\pricing\\spec-source.md",
+    "docs\\qa\\pricing\\test-cases-api.md",
+    "docs\\qa\\pricing\\test-cases-manual.md",
+    "docs\\qa\\pricing\\test-cases-unit.md",
+    "docs\\qa\\pricing\\test-plan.md",
+    "tests\\api\\test_cart_api.py",
+    "tests\\unit\\test_pricing.py"
+  ],
+  "tool_calls": {
+    "Agent": 1,
+    "Bash": 6,
+    "Read": 2,
+    "Write": 4,
+    "Edit": 2
+  },
+  "task_dirs": {
+    "pricing": {
+      "contract_checks_total": 60,
+      "contract_checks_failed": 0,
+      "failed_checks": []
+    }
+  },
+  "agents_dispatched": [
+    "qa-agentic-pipeline:autotest-builder"
+  ],
+  "skills_invoked": [],
+  "cost": {
+    "rows": [
+      {
+        "bucket": "Orchestrator (main thread)",
+        "input": 4,
+        "cache_write_5m": 0,
+        "cache_write_1h": 15647,
+        "cache_read": 38478,
+        "output": 1305,
+        "api_calls": 2,
+        "input_total": 54129,
+        "cost_usd": 0.0795,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 3 — autotest-builder",
+        "input": 20,
+        "cache_write_5m": 41346,
+        "cache_write_1h": 0,
+        "cache_read": 284811,
+        "output": 9643,
+        "api_calls": 10,
+        "input_total": 326177,
+        "cost_usd": 0.2283,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    ],
+    "total": {
+      "input": 24,
+      "cache_write_5m": 41346,
+      "cache_write_1h": 15647,
+      "cache_read": 323289,
+      "output": 10948,
+      "api_calls": 12,
+      "input_total": 380306,
+      "cost_usd": 0.3078
+    },
+    "harness_total_cost_usd": 0.3078099,
+    "num_turns": 2,
+    "wall_seconds": 95.703
+  }
+}

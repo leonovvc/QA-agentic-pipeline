@@ -259,7 +259,7 @@ Any `MISSING` line or `tsc` error is a hallucination to fix before a human spend
 - The coverage matrix was produced and reviewed before any test code file was written.
 - Verification passed: `tsc --noEmit` (or language equivalent) exits 0 and the selector/endpoint grep reports zero `MISSING` lines.
 - Each generated test has a recorded review decision (Stage 4 in the pipeline); no test is marked KEEP without one.
-- The tests were run; failures are reported as test defects or suspected product defects, never "fixed" by weakening the assertion.
+- The tests were run; failures are reported as test defects or suspected product defects, never "fixed" by weakening the assertion or hidden behind an expected-failure / skip marker (`xfail`, `test.fail`, `test.fixme`, `it.failing`).
 - Reproducibility metadata recorded: the model used, the input source (task ID / spec hash), and the version of any skill / CLI / MCP server invoked.
 - In Pipeline Mode: every non-`MAN` case appears exactly once in `autotest-summary.md` with a real status, and every test title carries its TC ID.
 

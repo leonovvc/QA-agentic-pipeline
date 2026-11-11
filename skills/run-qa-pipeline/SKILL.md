@@ -44,6 +44,7 @@ Ask only what's missing; don't block on defaults that are safe to assume.
 5. **The pipeline is not "done" until a human has seen the consolidated checkpoint.** Even a fully clean run (no Blocking findings, no Disputed items) still produces and presents the checkpoint report — silence from the reviewer is not the same as skipping the human step.
 6. **Progress lives on disk, not in this session's memory.** Every stage transition is written to the task file (`qa-pipeline-task-state`) before and after that stage runs — if this session ends mid-stage for any reason (dropped connection, exhausted daily limit, closed window), the next session resumes from the task file, not from what this conversation remembers.
 7. **A resumed stage restarts whole; a completed stage never reruns.** If the task file shows a stage `in_progress` with no `completed_at`, that stage is redone from scratch on resume — its partial work, if any, is not trusted. Stages already `done` are never rerun; their output files are read directly as input to the next stage.
+8. **The orchestrator coordinates; it never does a stage's work.** It writes only the task file, `board.md` and `checkpoint.md`. It does not write or edit a stage's artifacts (`spec-gap-report.md`, `test-plan.md`, case files, `autotest-summary.md`, `qa-review-report.md`) or test files, and it does not run the test suite — re-running reported results is Stage 4's job. When an agent reports that it could not do part of its job (a command was denied, a dependency or credential is missing), that report *is* the stage's result: keep its `not run` statuses and reasons, carry them into the checkpoint, and if the cause looks transient, dispatch the same agent once more with the cause stated. Doing the work in the main thread instead skips the stage's procedure and output format, and leaves the stage's artifact contradicting what the agent recorded.
 
 ## Pipeline Stages
 
@@ -83,7 +84,7 @@ Before each stage: write that stage's status to `in_progress` in the task file (
 1. **Resolve the input.** URL → fetch. PDF → extract. Pasted text → use directly. Hand off to `spec-analyst` together with the task ID, `docs_dir`, and output language.
 2. **Stage 1.** Run `spec-analyst`. If Blocking Gaps make test design impossible for the *entire* spec (not just one section), set the task to `BLOCKED` and stop — this is the sole mid-chain exception (Core Principle 4). Otherwise continue with whatever is testable, carrying forward the Assumptions Made list into the task file's `assumptions_log`.
 3. **Stage 2.** Run `qa-doc-writer` with the spec + Stage 1's report as input.
-4. **Stage 3.** Run `autotest-builder` with Stage 2's test plan/cases as input, targeting the confirmed repository.
+4. **Stage 3.** Run `autotest-builder` with Stage 2's test plan/cases as input, targeting the confirmed repository. If it reports tests it could not run, pass that on as-is (Core Principle 8) — do not run or rewrite them yourself.
 5. **Stage 4.** Run `qa-doc-reviewer` with the original spec, Stage 1's report, Stage 2's output, and Stage 3's output. On completion, set task `status` to `IN_REVIEW` and populate `disputed_items` from its report.
 6. **Assemble the Human Checkpoint Report** (below) from all four stages' outputs, save it as `docs/qa/<task-id>/checkpoint.md`, and present it. The pipeline's work is complete at this point; downstream actions (committing, opening a PR, resolving Disputed items) wait for the human's response. When the human resolves everything, set task `status` to `DONE`; if they ask for one stage to be redone, set only that stage back to `pending` and the task to `IN_PROGRESS`.
 
@@ -133,6 +134,7 @@ considered final.
 - **Presenting the checkpoint as a summary of what was DONE rather than what needs a DECISION.** The report's job is to make the Disputed section impossible to miss, not to bury it under a wall of "everything looks great."
 - **Treating the checkpoint as optional when the run was clean.** A clean run still gets presented — "no disputes" is information the human should see stated, not inferred from silence.
 - **Starting a fresh task without checking for an existing one first.** Produces a duplicate task file for the same spec and throws away the resumability this pipeline exists to provide.
+- **Taking over a stage when its agent is blocked.** Running the tests yourself and rewriting `autotest-summary.md` after `autotest-builder` reported a denied command produces a summary without the Stack Profile and Mapping the reviewer needs, written by a context that never ran stack detection. Seen in a recorded eval run; the evals now check the main thread never writes a stage artifact.
 - **Resuming a stage mid-way instead of restarting it whole.** There's no reliable way to know how much of an interrupted stage actually finished — per `qa-pipeline-task-state`, always redo it from the start.
 
 ## Verification

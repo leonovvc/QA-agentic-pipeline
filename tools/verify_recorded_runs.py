@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Re-derive the published eval numbers from the recorded artifacts (runs in CI).
 
-eval-results/<run-id>/<case>/scores.json holds the contract-conformance and recall
-numbers quoted in the README. This script recomputes both from the artifacts committed
+eval-results/<run-id>/<case>/scores.json holds the contract-conformance, recall and
+token-cost numbers quoted in the README. This script recomputes them from the artifacts
+and usage ledgers committed
 next to them, with the current tools, and fails if any number differs — so a published
 figure can't silently drift from the evidence, and a change to the checker that would
 re-grade old runs is noticed.
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_artifacts import run as check_run  # noqa: E402
 from score_spec_analysis import score as recall_score  # noqa: E402
+from measure_run_cost import summarize  # noqa: E402
 
 
 def main() -> int:
@@ -31,7 +33,7 @@ def main() -> int:
         return 0
     mismatches = []
     for sf in score_files:
-        stored = json.loads(sf.read_text())
+        stored = json.loads(sf.read_text(encoding="utf-8"))
         case_dir = sf.parent
         art = case_dir / "artifacts" / "docs" / "qa"
         case = stored["case"]
@@ -43,11 +45,22 @@ def main() -> int:
                 mismatches.append(f"{case_dir.relative_to(ROOT)} {task}: contract {s['total'] - s['failed']}/{s['total']} "
                                   f"!= recorded {rec['contract_checks_total'] - rec['contract_checks_failed']}/{rec['contract_checks_total']}")
             if "spec_defect_recall" in rec:
-                truth = yaml.safe_load((ROOT / "evals" / case / "ground-truth.yaml").read_text())
-                r = recall_score((task_dir / "spec-gap-report.md").read_text(), truth)
+                truth = yaml.safe_load((ROOT / "evals" / case / "ground-truth.yaml").read_text(encoding="utf-8"))
+                r = recall_score((task_dir / "spec-gap-report.md").read_text(encoding="utf-8"), truth)
                 if r["found"] != rec["spec_defect_recall"]["found"]:
                     mismatches.append(f"{case_dir.relative_to(ROOT)} {task}: recall {r['found']} != recorded "
                                       f"{rec['spec_defect_recall']['found']}")
+        ledger_path = case_dir / "usage-ledger.json"
+        if "cost" in stored:
+            if not ledger_path.exists():
+                mismatches.append(f"{case_dir.relative_to(ROOT)}: cost recorded but usage-ledger.json missing")
+            else:
+                cost = summarize(json.loads(ledger_path.read_text(encoding="utf-8")))
+                if cost["total"] != stored["cost"]["total"] or cost["rows"] != stored["cost"]["rows"]:
+                    mismatches.append(f"{case_dir.relative_to(ROOT)}: cost {cost['total']['cost_usd']} / "
+                                      f"{cost['total']['input_total'] + cost['total']['output']} tokens != recorded "
+                                      f"{stored['cost']['total']['cost_usd']} / "
+                                      f"{stored['cost']['total']['input_total'] + stored['cost']['total']['output']}")
         print(f"checked {sf.relative_to(ROOT)}")
     for m in mismatches:
         print(f"MISMATCH {m}")

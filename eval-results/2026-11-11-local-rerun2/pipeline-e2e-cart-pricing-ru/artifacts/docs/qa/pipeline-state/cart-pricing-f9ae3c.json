@@ -1,0 +1,39 @@
+{
+  "task_id": "cart-pricing-f9ae3c",
+  "title": "Расчёт стоимости корзины интернет-магазина",
+  "source": {"type": "text", "value": "specs/cart-pricing.md"},
+  "target_repo": ".",
+  "output_language": "ru",
+  "docs_dir": "docs/qa/cart-pricing-f9ae3c",
+  "status": "IN_REVIEW",
+  "created_at": "2026-11-11T19:42:54Z",
+  "updated_at": "2026-11-11T19:57:00Z",
+  "stages": [
+    {"stage": 1, "agent": "spec-analyst", "status": "done", "started_at": "2026-11-11T19:42:54Z", "completed_at": "2026-11-11T19:44:30Z", "output": ["docs/qa/cart-pricing-f9ae3c/spec-source.md", "docs/qa/cart-pricing-f9ae3c/spec-gap-report.md", "docs/qa/cart-pricing-f9ae3c/spec-annotated.md"]},
+    {"stage": 2, "agent": "qa-doc-writer", "status": "done", "started_at": "2026-11-11T19:46:00Z", "completed_at": "2026-11-11T19:49:50Z", "output": ["docs/qa/cart-pricing-f9ae3c/test-plan.md", "docs/qa/cart-pricing-f9ae3c/test-cases-unit.md", "docs/qa/cart-pricing-f9ae3c/test-cases-api.md", "docs/qa/cart-pricing-f9ae3c/test-cases-e2e.md", "docs/qa/cart-pricing-f9ae3c/test-cases-manual.md"]},
+    {"stage": 3, "agent": "autotest-builder", "status": "done", "started_at": "2026-11-11T19:50:00Z", "completed_at": "2026-11-11T19:52:50Z", "output": ["docs/qa/cart-pricing-f9ae3c/autotest-summary.md", "tests/test_cart_pricing.py"]},
+    {"stage": 4, "agent": "qa-doc-reviewer", "status": "done", "started_at": "2026-11-11T19:53:00Z", "completed_at": "2026-11-11T19:56:30Z", "output": "docs/qa/cart-pricing-f9ae3c/qa-review-report.md"}
+  ],
+  "assumptions_log": [
+    "Этап 1: A1–A9 (см. spec-gap-report.md, раздел «Допущения»): пустая корзина — утверждается только subtotal=0 и недоступность оформления; пороги 3000/5000 включительно, от суммы до скидки; скидка округляется half-up; распродажа приоритетнее членства; N = 5000 − subtotal. Расхождение с кодом: shipping_cost использует > 5000 вместо >= 5000.",
+    "Этап 2: A10–A16 (см. test-plan.md): формат N проверяется шаблоном; успешный ответ API — HTTP 200 с четырьмя полями; суммы сравниваются как десятичные; API и E2E в репозитории не автоматизируются (нет кода); итог проверяется на уровне API; негативных API-кейсов на quantity нет (зависят от Q1/Q6); шкала риска P0 ≥15, P1 10–14, P2 5–9, P3 ≤4.",
+    "Этап 3: стек pytest, существующий набор дополнен; TC-UNIT-003 закрыт существующим тестом без TC-ID в названии; CI в репозитории нет."
+  ],
+  "disputed_items": [
+    "Предполагаемый дефект REQ-10: shipping_cost при ровно 5000.00 возвращает 300.00 вместо 0.00 (pricing.py:32, > вместо >=); TC-UNIT-006 красный без xfail — исправить код, уточнить ТЗ или карантин.",
+    "Писать ли кейсы по слабому оракулу для заблокированных требований (REQ-18, REQ-8, отрицательный quantity на API, негативная безопасность Q5).",
+    "Уровень пирамиды для REQ-19/REQ-20 и REQ-5: E2E (автор) или ниже (ревьюер), зависит от Q3."
+  ],
+  "history": [
+    {"at": "2026-11-11T19:42:54Z", "event": "task_created"},
+    {"at": "2026-11-11T19:42:54Z", "event": "stage_started", "stage": 1},
+    {"at": "2026-11-11T19:44:30Z", "event": "stage_completed", "stage": 1},
+    {"at": "2026-11-11T19:46:00Z", "event": "stage_started", "stage": 2},
+    {"at": "2026-11-11T19:49:50Z", "event": "stage_completed", "stage": 2},
+    {"at": "2026-11-11T19:50:00Z", "event": "stage_started", "stage": 3},
+    {"at": "2026-11-11T19:52:50Z", "event": "stage_completed", "stage": 3},
+    {"at": "2026-11-11T19:53:00Z", "event": "stage_started", "stage": 4},
+    {"at": "2026-11-11T19:56:30Z", "event": "stage_completed", "stage": 4},
+    {"at": "2026-11-11T19:57:00Z", "event": "status_changed", "to": "IN_REVIEW"}
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "case": "stage3-greenfield-no-tests-ru",
+  "artifacts": [
+    "docs\\qa\\pipeline-state\\pricing.json",
+    "docs\\qa\\pricing\\autotest-summary.md",
+    "docs\\qa\\pricing\\spec-annotated.md",
+    "docs\\qa\\pricing\\spec-gap-report.md",
+    "docs\\qa\\pricing\\spec-source.md",
+    "docs\\qa\\pricing\\test-cases-api.md",
+    "docs\\qa\\pricing\\test-cases-manual.md",
+    "docs\\qa\\pricing\\test-cases-unit.md",
+    "docs\\qa\\pricing\\test-plan.md",
+    "tests\\api\\test_cart_api.py",
+    "tests\\unit\\test_pricing.py"
+  ],
+  "tool_calls": {
+    "Agent": 1,
+    "Bash": 6,
+    "Read": 3,
+    "Edit": 3,
+    "Write": 3
+  },
+  "task_dirs": {
+    "pricing": {
+      "contract_checks_total": 60,
+      "contract_checks_failed": 3,
+      "failed_checks": [
+        "[stage 3] autotest-summary.md: required sections present (missing: Stack Profile, Mapping, Commands Run, Suspected Product Defects, Allocation Disagreements)",
+        "[stage 3] every automatable case appears in the mapping (missing: TC-API-001, TC-UNIT-001, TC-UNIT-002, TC-UNIT-003, TC-UNIT-004, TC-UNIT-005)",
+        "[stage 3] commands run are recorded"
+      ]
+    }
+  },
+  "agents_dispatched": [
+    "qa-agentic-pipeline:autotest-builder"
+  ],
+  "skills_invoked": [],
+  "cost": {
+    "rows": [
+      {
+        "bucket": "Orchestrator (main thread)",
+        "input": 16,
+        "cache_write_5m": 0,
+        "cache_write_1h": 22079,
+        "cache_read": 217506,
+        "output": 3412,
+        "api_calls": 8,
+        "input_total": 239601,
+        "cost_usd": 0.1442,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 3 — autotest-builder",
+        "input": 12,
+        "cache_write_5m": 29020,
+        "cache_write_1h": 0,
+        "cache_read": 152405,
+        "output": 6987,
+        "api_calls": 6,
+        "input_total": 181437,
+        "cost_usd": 0.1577,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    ],
+    "total": {
+      "input": 28,
+      "cache_write_5m": 29020,
+      "cache_write_1h": 22079,
+      "cache_read": 369911,
+      "output": 10399,
+      "api_calls": 14,
+      "input_total": 421038,
+      "cost_usd": 0.3019
+    },
+    "harness_total_cost_usd": 0.30190310000000004,
+    "num_turns": 10,
+    "wall_seconds": 73.101
+  }
+}
