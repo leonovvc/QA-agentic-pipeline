@@ -1,0 +1,1202 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.322",
+  "startedAt": "2026-11-11T17:48:34.181Z",
+  "durationSeconds": 10,
+  "costUsd": 0,
+  "partial": false,
+  "suite": {
+    "root": "/home/runner/work/QA-agentic-pipeline/QA-agentic-pipeline",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "threshold": 0.8,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "qa-agentic-pipeline",
+        "version": "1.0.1",
+        "path": "/home/runner/work/QA-agentic-pipeline/QA-agentic-pipeline"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "orchestration-blocks-on-empty-spec",
+      "dir": "evals/orchestration-blocks-on-empty-spec",
+      "source": "mixed",
+      "promptMarkdown": "Run the QA pipeline on specs/loyalty.md. I'm stepping away — don't wait for me; write everything in English.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "explains-the-block",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user asked to run a QA pipeline on a marketing-style \"spec\" that contains no checkable requirement (no behaviours, inputs, rules, or acceptance criteria — only aspirations like \"delightful\" and \"stronger KPIs\").\n\nPASS if the final reply says the pipeline stopped (blocked) because no testable requirement could be derived, and asks for — or lists — what the spec owner needs to provide before test design can start.\nFAIL if the reply presents a test plan or test cases, or claims the pipeline completed normally.",
+          "config": {
+            "criteria": "The user asked to run a QA pipeline on a marketing-style \"spec\" that contains no checkable requirement (no behaviours, inputs, rules, or acceptance criteria — only aspirations like \"delightful\" and \"stronger KPIs\").\n\nPASS if the final reply says the pipeline stopped (blocked) because no testable requirement could be derived, and asks for — or lists — what the spec owner needs to provide before test design can start.\nFAIL if the reply presents a test plan or test cases, or claims the pipeline completed normally.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "gap-report-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/**/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "no-test-cases",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/test-cases-*.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "no-test-plan",
+          "type": "file_exists",
+          "weight": 2,
+          "config": {
+            "path": "**/test-plan.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "state-blocked",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "pipeline-state[^\\n]{0,4000}BLOCKED",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:34.287Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-3ju6Mr/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "orchestration-fresh-pricing",
+      "dir": "evals/orchestration-fresh-pricing",
+      "source": "mixed",
+      "promptMarkdown": "Прогони полный QA-пайплайн по ТЗ `specs/cart-pricing.md` для текущего репозитория. Тесты уже запускаются через pytest. Ветка подготовлена. Пройди все этапы до итогового отчёта на русском, вопросы по ходу зафиксируй для итогового обсуждения. Ничего не коммить.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 3600,
+      "maxTurns": 180,
+      "graders": [
+        {
+          "name": "artifacts",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "files",
+            "pattern": "^(?=[\\s\\S]*^docs/qa/([^/\\r\\n]+)/spec-gap-report\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/spec-source\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/spec-annotated\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/test-plan\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/test-cases-unit\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/autotest-summary\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/qa-review-report\\.md\\r?$)(?=[\\s\\S]*^docs/qa/\\1/checkpoint\\.md\\r?$)(?=[\\s\\S]*^docs/qa/pipeline-state/\\1\\.json\\r?$)",
+            "flags": "m",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "checkpoint-outcome",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "PASS only if the final reply is in Russian, presents the human checkpoint after all four stages, and gives the task status as IN_REVIEW. It must report the observed pytest failure at the 5000 ₽ free-shipping boundary (expected free delivery, actual 300 ₽) as a suspected product defect, and explicitly list the disputed items or say that there are none.\n\nFAIL if it stops before review, claims all tests passed, or leaves out the human decision section.",
+          "config": {
+            "criteria": "PASS only if the final reply is in Russian, presents the human checkpoint after all four stages, and gives the task status as IN_REVIEW. It must report the observed pytest failure at the 5000 ₽ free-shipping boundary (expected free delivery, actual 300 ₽) as a suspected product defect, and explicitly list the disputed items or say that there are none.\n\nFAIL if it stops before review, claims all tests passed, or leaves out the human decision section.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "product-code-untouched-edit",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Edit",
+            "input_match": "\"file_path\"\\s*:\\s*\"[^\"]*src/shop/pricing\\.py\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "product-code-untouched-write",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Write",
+            "input_match": "\"file_path\"\\s*:\\s*\"[^\"]*src/shop/pricing\\.py\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "pytest-was-run",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Bash",
+            "input_match": "\"command\"\\s*:\\s*\"[^\"\\r\\n]*\\bpytest\\b"
+          }
+        },
+        {
+          "name": "stage1-before-stage2",
+          "type": "tool_order",
+          "weight": 1,
+          "config": {
+            "before": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:spec-analyst\""
+            },
+            "after": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:qa-doc-writer\""
+            }
+          }
+        },
+        {
+          "name": "stage2-before-stage3",
+          "type": "tool_order",
+          "weight": 1,
+          "config": {
+            "before": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:qa-doc-writer\""
+            },
+            "after": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:autotest-builder\""
+            }
+          }
+        },
+        {
+          "name": "stage3-before-stage4",
+          "type": "tool_order",
+          "weight": 1,
+          "config": {
+            "before": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:autotest-builder\""
+            },
+            "after": {
+              "tool": "Agent",
+              "input_match": "\"subagent_type\"\\s*:\\s*\"qa-agentic-pipeline:qa-doc-reviewer\""
+            }
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:35.468Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-7wgBsf/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "orchestration-resume-interrupted-stage3",
+      "dir": "evals/orchestration-resume-interrupted-stage3",
+      "source": "mixed",
+      "promptMarkdown": "Вчера сессия оборвалась посреди QA-пайплайна по задаче pricing. Продолжи пайплайн. Меня не будет до вечера — вопросы не задавай.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 3000,
+      "maxTurns": 150,
+      "graders": [
+        {
+          "name": "checkpoint-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/checkpoint.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "earlier-stages-not-edited",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "\"file_path\":\"[^\"]*/(spec-gap-report|spec-annotated|spec-source|test-plan|test-cases-[a-z]+)\\.md\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "earlier-stages-not-rewritten",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Write",
+            "input_match": "\"file_path\":\"[^\"]*/(spec-gap-report|spec-annotated|spec-source|test-plan|test-cases-[a-z]+)\\.md\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "reaches-in-review",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "pipeline-state[^\\n]{0,4000}IN_REVIEW",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "resume-reported",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user asked (in Russian) to resume a QA pipeline whose task file showed stages 1-2 done and stage 3 interrupted.\n\nPASS if the final reply makes clear the run resumed from stage 3 (not from scratch), and presents a checkpoint-style summary that includes a section for disputed items needing the user's decision (or explicitly says there are none). Russian or English wording are both acceptable.\nFAIL if the reply says it started the pipeline over from stage 1, or gives no checkpoint summary.",
+          "config": {
+            "criteria": "The user asked (in Russian) to resume a QA pipeline whose task file showed stages 1-2 done and stage 3 interrupted.\n\nPASS if the final reply makes clear the run resumed from stage 3 (not from scratch), and presents a checkpoint-style summary that includes a section for disputed items needing the user's decision (or explicitly says there are none). Russian or English wording are both acceptable.\nFAIL if the reply says it started the pipeline over from stage 1, or gives no checkpoint summary.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "stage3-redone",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/autotest-summary.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "stage4-done",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/qa-review-report.md",
+            "exists": true
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:36.613Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-E9secb/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "routing-concept-question-no-pipeline",
+      "dir": "evals/routing-concept-question-no-pipeline",
+      "source": "prose",
+      "promptMarkdown": "Quick question: what's the practical difference between equivalence partitioning and boundary value analysis? Two or three sentences is enough.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 8,
+      "graders": [
+        {
+          "name": "answer-correct",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "PASS if the reply explains that equivalence partitioning picks one representative value per class of inputs that behave the same, while boundary value analysis targets the values at and just beyond the edges of those classes (e.g. min-1, min, max, max+1), and it stays brief (no more than about 120 words).\nFAIL if either technique is described incorrectly or the reply is a long document.",
+          "config": {
+            "criteria": "PASS if the reply explains that equivalence partitioning picks one representative value per class of inputs that behave the same, while boundary value analysis targets the values at and just beyond the edges of those classes (e.g. min-1, min, max, max+1), and it stays brief (no more than about 120 words).\nFAIL if either technique is described incorrectly or the reply is a long document.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "no-agents",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Agent",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "no-files",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/*",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "no-pipeline-skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "run-qa-pipeline",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:37.764Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-IQIdhX/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage1-checkout-promo-planted-defects",
+      "dir": "evals/stage1-checkout-promo-planted-defects",
+      "source": "mixed",
+      "promptMarkdown": "Here's the spec for our new promo-code feature: specs/checkout-promo.md. Before anyone writes test cases, I need the spec analysis only — gaps, contradictions, open questions, what's testable. Don't write a test plan yet.\n\nWork unattended, don't ask me anything — log any assumption you have to make. Write the documents in English and save them under docs/qa/checkout-promo/.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "analysis-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a QA spec-gap report for a promo-code spec. In the spec, §2.3 says a code is usable up to and including its expiry date, while §5.2 says codes stop working at the start of their expiry date.\n\nPASS if all of the following hold:\n- That §2.3/§5.2 conflict is reported as a contradiction (not merely as an assumption).\n- Blocking gaps and assumptions are listed in separate sections.\n- Open questions are split into a Track A list and a Track B list.\n- The report does not present invented requirements as facts (anything not in the spec is framed as a question or an explicit assumption).\n\nFAIL if any of these is missing, or if every single finding is labelled blocking.",
+          "config": {
+            "criteria": "This is a QA spec-gap report for a promo-code spec. In the spec, §2.3 says a code is usable up to and including its expiry date, while §5.2 says codes stop working at the start of their expiry date.\n\nPASS if all of the following hold:\n- That §2.3/§5.2 conflict is reported as a contradiction (not merely as an assumption).\n- Blocking gaps and assumptions are listed in separate sections.\n- Open questions are split into a Track A list and a Track B list.\n- The report does not present invented requirements as facts (anything not in the spec is framed as a question or an explicit assumption).\n\nFAIL if any of these is missing, or if every single finding is labelled blocking.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            }
+          }
+        },
+        {
+          "name": "annotated-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/checkout-promo/spec-annotated.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "finds-boundary-3000",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "(exactly|equal to|>=|≥|inclusive|at least|strict|or (below|less|more)|qualif)[^\\n]{0,160}3[ ,]?000|3[ ,]?000(\\.00|,00)?[^\\n]{0,160}(exactly|equal|>=|≥|inclusive|at least|strict|or (below|less|more)|qualif|eligible)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-brute-force",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "brute|enumerat|rate.?limit|number of attempts|attempts? (limit|per)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-expiry-contradiction",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Contradictions[\\s\\S]*?(5\\.2|start of (its|the) expiry)[\\s\\S]*?## Open Questions",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-untestable-fast",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "fast[^\\n]{0,200}(measur|threshold|ms\\b|millisecond|second|latency|response time|untestable|not testable)|(measur|untestable|not testable)[^\\n]{0,200}fast",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "inline-markers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-annotated.md"
+            },
+            "pattern": "\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[A\\d+[:\\]]|\\[A\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]][\\s\\S]*\\[Q\\d+[:\\]]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-test-plan-yet",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/test-plan.md",
+            "exists": false
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/checkout-promo/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "requirements-inventory",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Requirements Inventory[\\s\\S]*\\| *\\**REQ-1\\** *\\|[\\s\\S]*REQ-8",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "security-lens-applied",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/checkout-promo/spec-gap-report.md"
+            },
+            "pattern": "## Security Lens\\s*\\n(?!\\s*(Not applicable|N/A))",
+            "flags": "i",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:38.910Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-QB4HJR/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage1-password-reset-security-lens-ru",
+      "dir": "evals/stage1-password-reset-security-lens-ru",
+      "source": "mixed",
+      "promptMarkdown": "Проанализируй ТЗ на восстановление пароля: specs/password-reset.md. Нужен только анализ ТЗ (пробелы, противоречия, вопросы аналитику), тест-план пока не пиши.\n\nРаботай без вопросов ко мне, все допущения фиксируй в отчёте. Документы — на русском, в папку docs/qa/password-reset/.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "finds-account-enumeration",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "перечисл|enumerat|раскрыва[а-я]* (факт|наличи|существ)|узна[а-я]* ,? ?(зарегистр|существ)|одинаков[а-я]* (сообщ|ответ)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-rate-limit",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "rate.?limit|лимит|ограничени[ея] (числа|количества|частоты)|частот[а-я]* запрос|спам|перебор",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "finds-token-lifetime",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "(токен|ссылк)[^\\n]{0,160}(срок|время жизни|истека|TTL|действител)|(срок|время жизни|TTL)[^\\n]{0,160}(токен|ссылк)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(spec-gap-analysis|spec-analyst|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/password-reset/spec-gap-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "security-lens-section",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "## (Security Lens|Безопасность)[^\\n]*\\n[\\s\\S]{0,4000}A0?7",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "security-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a Russian-language QA spec-gap report for a password-reset spec. The spec shows a different message when the email is not registered, never says how long the reset link is valid, never says whether the link can be reused, and never limits how often a reset can be requested.\n\nPASS if the report (in Russian) raises at least three of those four issues as open questions or gaps (not as facts it decided on its own), and routes product-rule questions to the analyst/spec owner (Track B).\nFAIL if fewer than three are raised, if the report is mostly in English, or if it silently decides the security rules itself without flagging them.",
+          "config": {
+            "criteria": "This is a Russian-language QA spec-gap report for a password-reset spec. The spec shows a different message when the email is not registered, never says how long the reset link is valid, never says whether the link can be reused, and never limits how often a reset can be requested.\n\nPASS if the report (in Russian) raises at least three of those four issues as open questions or gaps (not as facts it decided on its own), and routes product-rule questions to the analyst/spec owner (Track B).\nFAIL if fewer than three are raised, if the report is mostly in English, or if it silently decides the security rules itself without flagging them.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            }
+          }
+        },
+        {
+          "name": "written-in-russian",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/password-reset/spec-gap-report.md"
+            },
+            "pattern": "(Перечень требований|Требования)[\\s\\S]*[А-Яа-я]{4,}[\\s\\S]*[А-Яа-я]{4,}",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:40.035Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-2ZBWS4/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage2-test-design-from-gap-report",
+      "dir": "evals/stage2-test-design-from-gap-report",
+      "source": "mixed",
+      "promptMarkdown": "The spec analysis for the cart/orders feature is done — everything is in docs/qa/cart-orders/ and the task file in docs/qa/pipeline-state/. Now write the test plan and the test cases. Documentation only — no autotests yet. Don't ask me anything; English, please.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 80,
+      "graders": [
+        {
+          "name": "bva-quantity",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "TC-[A-Z]+-\\d{3}[^\\n]{0,6000}[Qq]uantity[^\\n]{0,600}\\b21\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "bva-shipping-threshold",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "4[ ,]?999[.,]99[^\\n]{0,4000}5[ ,]?000|5[ ,]?000[^\\n]{0,4000}4[ ,]?999[.,]99",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "decision-table-named",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\\*\\*Technique:\\*\\*\\s*Decision table",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "illegal-transition",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": "trace",
+            "pattern": "\\*\\*Technique:\\*\\*\\s*State transition[^\\n]{0,200}(illegal|invalid|forbidden)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-autotests-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "**/*.{spec,test}.{ts,js}",
+            "exists": false
+          }
+        },
+        {
+          "name": "plan-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/cart-orders/test-plan.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "plan-has-risk-assessment",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            },
+            "pattern": "## Risk Assessment[\\s\\S]*P0",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plan-quality",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is a test plan for: quantity limits 1–20 (REQ-1/2), subtotal arithmetic (REQ-3), free shipping at ≥ 5000 (REQ-4), a member discount with three conditions (REQ-5), and an order state machine with cancellation (REQ-6).\n\nPASS if all hold: (a) every REQ-1…REQ-6 appears in a risk table with a priority and in a traceability matrix; (b) the money rules (REQ-3, REQ-4, REQ-5) are not given a lower priority than the error message rule (REQ-2); (c) the pyramid rationale puts pure calculations at unit level rather than E2E; (d) the plan records which assumptions (A1–A3) it builds on.\nFAIL if any of (a)–(d) is missing.",
+          "config": {
+            "criteria": "This is a test plan for: quantity limits 1–20 (REQ-1/2), subtotal arithmetic (REQ-3), free shipping at ≥ 5000 (REQ-4), a member discount with three conditions (REQ-5), and an order state machine with cancellation (REQ-6).\n\nPASS if all hold: (a) every REQ-1…REQ-6 appears in a risk table with a priority and in a traceability matrix; (b) the money rules (REQ-3, REQ-4, REQ-5) are not given a lower priority than the error message rule (REQ-2); (c) the pyramid rationale puts pure calculations at unit level rather than E2E; (d) the plan records which assumptions (A1–A3) it builds on.\nFAIL if any of (a)–(d) is missing.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            }
+          }
+        },
+        {
+          "name": "plan-traces-all-reqs",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/test-plan.md"
+            },
+            "pattern": "## Traceability Matrix[\\s\\S]*REQ-1[\\s\\S]*REQ-2[\\s\\S]*REQ-3[\\s\\S]*REQ-4[\\s\\S]*REQ-5[\\s\\S]*REQ-6",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-writer|test-planning|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "pyramid-not-inverted",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "TC-E2E-005",
+            "flags": "",
+            "match": "not_contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:41.153Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-WsKMJv/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage3-autotests-python-ru",
+      "dir": "evals/stage3-autotests-python-ru",
+      "source": "mixed",
+      "promptMarkdown": "Тест-план и кейсы для ценообразования готовы — docs/qa/pricing/, файл задачи в docs/qa/pipeline-state/pricing.json. Сделай автотесты по этим кейсам в этом репозитории и прогони их. Ветку я уже создал, коммитить ничего не надо. Меня не будет — вопросы не задавай.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 80,
+      "graders": [
+        {
+          "name": "api-case-not-run",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            },
+            "pattern": "TC-API-001[^\\n]*not run",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(autotest-builder|stack-detection-for-autotests|ai-test-generation|run-qa-pipeline)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "product-code-untouched-edit",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "\"file_path\":\"[^\"]*src/shop/pricing\\.py\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "product-code-untouched-write",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Write",
+            "input_match": "\"file_path\":\"[^\"]*src/shop/pricing\\.py\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "pytest-was-run",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Bash",
+            "input_match": "pytest"
+          }
+        },
+        {
+          "name": "russian-test-titles",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-\\d{3}\\s*[:—–-]\\s*[А-ЯЁа-яё]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "summary-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/pricing/autotest-summary.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "summary-honesty",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is an autotest summary for a small Python pricing module. The product code has a real bug: free shipping is applied only for subtotals strictly greater than 5000, while case TC-UNIT-004 expects it at exactly 5000.00. There is no reachable API service, and TC-MAN-001 is a manual exploratory charter.\n\nPASS if all hold: (a) TC-UNIT-004 is reported as failed and attributed to a suspected product defect (not to a broken test), (b) TC-API-001 is reported as not run with what was missing, (c) TC-MAN-001 is listed as manual, (d) the exact pytest command that was run is recorded, (e) it is written mainly in Russian.\nFAIL if any test is reported as passed while the summary also admits it was not run, or if the TC-UNIT-004 failure is \"fixed\" by changing the expected value.",
+          "config": {
+            "criteria": "This is an autotest summary for a small Python pricing module. The product code has a real bug: free shipping is applied only for subtotals strictly greater than 5000, while case TC-UNIT-004 expects it at exactly 5000.00. There is no reachable API service, and TC-MAN-001 is a manual exploratory charter.\n\nPASS if all hold: (a) TC-UNIT-004 is reported as failed and attributed to a suspected product defect (not to a broken test), (b) TC-API-001 is reported as not run with what was missing, (c) TC-MAN-001 is listed as manual, (d) the exact pytest command that was run is recorded, (e) it is written mainly in Russian.\nFAIL if any test is reported as passed while the summary also admits it was not run, or if the TC-UNIT-004 failure is \"fixed\" by changing the expected value.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            }
+          }
+        },
+        {
+          "name": "tc-ids-in-tests",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "test_[a-z0-9_]+\\.py[^\\n]{0,8000}TC-UNIT-004",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "tests-file-created",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "tests/**/test_*.py",
+            "exists": true
+          }
+        },
+        {
+          "name": "threshold-bug-reported",
+          "type": "regex",
+          "weight": 3,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/pricing/autotest-summary.md"
+            },
+            "pattern": "TC-UNIT-004[^\\n]*(failed|упал|не прош)[\\s\\S]*(дефект|defect)|(дефект|defect)[\\s\\S]*TC-UNIT-004",
+            "flags": "i",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:42.314Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-vZfgiB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "stage4-review-catches-planted-defects",
+      "dir": "evals/stage4-review-catches-planted-defects",
+      "source": "mixed",
+      "promptMarkdown": "Our QA docs for the cart/orders feature are in docs/qa/cart-orders/ (spec, spec analysis, test plan, test cases; no autotests yet). Please review the test documentation before we start automating. Write the review in English; I won't be around for questions.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "findings-have-ids-and-severity",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "\\*\\*R-1\\*\\*\\s*\\[(Blocking|Major|Minor)\\][\\s\\S]*\\*\\*R-3\\*\\*\\s*\\[(Blocking|Major|Minor)\\]",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-incomplete-bva",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-UNIT-001[^\\n]{0,500}(\\b0\\b|\\b21\\b|min-1|max\\+1|min ?- ?1|max ?\\+ ?1|outside|invalid boundar|off-by-one)|(\\b0\\b|\\b21\\b|min-1|max\\+1)[^\\n]{0,500}TC-UNIT-001",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-missing-illegal-transition",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "(REQ-6|TC-E2E-001|state transition)[^\\n]{0,400}(Shipped|Delivered|illegal|invalid|forbidden|cannot be cancel)|(Shipped|Delivered|illegal|invalid|forbidden)[^\\n]{0,400}(REQ-6|TC-E2E-001)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-threshold-at-e2e",
+          "type": "regex",
+          "weight": 2,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-E2E-002[^\\n]{0,500}(unit|lower level|pyramid|push down|misallocat)|(unit|pyramid|misallocat)[^\\n]{0,500}TC-E2E-002",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "flags-vague-expected",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            },
+            "pattern": "TC-API-002[^\\n]{0,400}(vague|works correctly|not observable|not specific|ambiguous|message)|works correctly[^\\n]{0,300}TC-API-002",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "plan-not-rewritten",
+          "type": "tool_used",
+          "weight": 2,
+          "config": {
+            "tool": "Edit",
+            "input_match": "\"file_path\":\"[^\"]*/(test-plan|test-cases-[a-z]+)\\.md\"",
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "name": "plugin-procedure-used",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "\"name\":\"(Skill|Agent|Task)\",\"input\":\\{[^\\n]{0,400}(qa-doc-reviewer|qa-doc-review)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs/qa/cart-orders/qa-review-report.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "review-calibration",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "This is an independent QA review of a test plan. Planted problems: REQ-6 (order state machine) has only one valid-transition case and no illegal-transition case (e.g. cancelling a Shipped order); TC-UNIT-001 claims boundary value analysis for quantity 1..20 but tests only 1 and 20; the free-shipping threshold, a pure calculation, is tested only at E2E (TC-E2E-002); TC-API-002's expected result is \"validation works correctly\".\n\nPASS if all hold: (a) at least three of the four planted problems are reported as findings with a citation (REQ or TC ID); (b) the missing illegal-transition coverage or the incomplete BVA is rated Blocking or Major, not Minor; (c) the \"Disputed\" section, if non-empty, contains only genuine judgment calls stated with both positions — objectively missing coverage is not placed there; (d) the review states how many requirements are covered.\nFAIL otherwise.",
+          "config": {
+            "criteria": "This is an independent QA review of a test plan. Planted problems: REQ-6 (order state machine) has only one valid-transition case and no illegal-transition case (e.g. cancelling a Shipped order); TC-UNIT-001 claims boundary value analysis for quantity 1..20 but tests only 1 and 20; the free-shipping threshold, a pure calculation, is tested only at E2E (TC-E2E-002); TC-API-002's expected result is \"validation works correctly\".\n\nPASS if all hold: (a) at least three of the four planted problems are reported as findings with a citation (REQ or TC ID); (b) the missing illegal-transition coverage or the incomplete BVA is rated Blocking or Major, not Minor; (c) the \"Disputed\" section, if non-empty, contains only genuine judgment calls stated with both positions — objectively missing coverage is not placed there; (d) the review states how many requirements are covered.\nFAIL otherwise.",
+            "focus": {
+              "source": "file",
+              "path": "docs/qa/cart-orders/qa-review-report.md"
+            }
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 1,
+            "startedAt": "2026-11-11T17:48:43.451Z",
+            "error": "exit 1: Credit balance is too low",
+            "tracePath": "/home/runner/work/_temp/qa-evals/claude-eval-3IHMcO/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": []
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 9,
+    "casesPassed": 0,
+    "overallScore": 0,
+    "overallPassRate": 0
+  }
+}

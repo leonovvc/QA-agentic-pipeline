@@ -85,7 +85,13 @@ def tool_calls(trace: Path) -> list[dict]:
 
 
 def collect(kept: Path, case: str, dest: Path) -> dict:
-    cwd = kept / "home" / "cwd"
+    sealed = kept / "sealed"
+    if sealed.is_symlink():
+        raise ValueError(f"unexpected symlink at {sealed}")
+    home = (sealed if sealed.is_dir() else kept) / "home"
+    cwd = home / "cwd"
+    if home.is_symlink() or cwd.is_symlink():
+        raise ValueError(f"unexpected symlink in kept workspace path {cwd}")
     art = dest / "artifacts"
     if art.exists():
         shutil.rmtree(art)
@@ -97,7 +103,7 @@ def collect(kept: Path, case: str, dest: Path) -> dict:
 
     copied = []
     for p in sorted(cwd.rglob("*")):
-        if not p.is_file() or SKIP_PARTS & set(p.relative_to(cwd).parts):
+        if p.is_symlink() or not p.is_file() or SKIP_PARTS & set(p.relative_to(cwd).parts):
             continue
         rel = p.relative_to(cwd)
         is_doc = rel.parts[:2] == ("docs", "qa")

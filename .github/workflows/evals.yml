@@ -70,6 +70,15 @@ jobs:
             echo "::error::The eval harness did not retain any case workspaces."
             exit 1
           fi
+          for dir in "${kept[@]}"; do
+            if [[ -L "$dir" || -L "$dir/sealed" ]]; then
+              echo "::error::Unexpected symlink in the kept eval directory."
+              exit 1
+            fi
+            if [[ -d "$dir/sealed" ]]; then
+              chmod u+rx -- "$dir" "$dir/sealed"
+            fi
+          done
           python tools/collect_eval_run.py --results evals/results/run \
             --kept "${kept[@]}" --run-id "actions-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
       - uses: actions/upload-artifact@v4

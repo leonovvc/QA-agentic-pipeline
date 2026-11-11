@@ -131,6 +131,21 @@ conformance of the produced docs: 60/60.
 `CART_API_URL`, один выявил заложенный дефект: при сумме ровно 5000 ₽
 доставка стоит 300 ₽ вместо 0 ₽. Полный прогон девяти eval-кейсов с моделью
 ещё не выполнен.
+
+#### GitHub Actions — 11 ноября 2026
+
+[Запуск 43071656441, попытка 1](https://github.com/leonovvc/QA-agentic-pipeline/actions/runs/43071656441)
+на ветке `evals/full-run`, коммит `bd7f086`. Claude Code 2.1.322 обнаружил все
+девять кейсов и сделал по одной попытке. API Anthropic отклонил каждый вызов с
+ошибкой `Credit balance is too low`.
+
+Оценено **0 из 9** кейсов. Значения `0.00` в отчёте выставлены раннером при
+ошибке API. Грейдеры не запускались, агенты не создали QA-артефактов, отчёт
+раннера показывает расход $0.00. Сквозной сценарий `orchestration-fresh-pricing`
+ожидает прогона с доступом к модели.
+
+[Отчёт запуска](../eval-results/actions-43071656441-1/report.html) ·
+[Исходный JSON](../eval-results/actions-43071656441-1/aggregate-result.json).
 <!-- EVAL-DETAILS:END -->
 
 ### Running the suite
