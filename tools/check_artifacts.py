@@ -143,12 +143,12 @@ def sections(md: str) -> dict[str, str]:
 
 
 def find_section(secs: dict[str, str], key: str) -> str | None:
-    for heading, body in secs.items():
-        h = norm(heading)
-        for alias in HEADINGS[key]:
-            if h.startswith(alias.lower()):
-                return body
-    return None
+    """The first section whose heading matches an alias; a non-empty one wins, so a report
+    that writes both the Russian and the English heading (`## Соответствие…` then
+    `## Mapping`) is read from the heading that actually has the content."""
+    found = [body for heading, body in secs.items()
+             if any(norm(heading).startswith(alias.lower()) for alias in HEADINGS[key])]
+    return next((b for b in found if b.strip()), found[0] if found else None)
 
 
 def table_rows(body: str) -> list[list[str]]:
@@ -196,7 +196,7 @@ def check_stage1(res: Result, d: Path) -> dict:
         res.add(1, f"{f} exists", (d / f).exists())
     if not (d / "spec-gap-report.md").exists():
         return ctx
-    report = (d / "spec-gap-report.md").read_text()
+    report = (d / "spec-gap-report.md").read_text(encoding="utf-8")
     secs = check_sections(res, 1, "spec-gap-report.md", report)
 
     score = re.search(r"^## .*?(?:Testability Score|Оценка тестируемости)\s*:?\s*(\d)", report, re.M)
@@ -238,7 +238,7 @@ def check_stage1(res: Result, d: Path) -> dict:
             len(sec_body.strip()) > 10)
 
     if (d / "spec-annotated.md").exists():
-        ann = (d / "spec-annotated.md").read_text()
+        ann = (d / "spec-annotated.md").read_text(encoding="utf-8")
         markers_q = {m.group(1) for m in re.finditer(r"\[(Q\d+)\b", ann)}
         markers_a = {m.group(1) for m in re.finditer(r"\[(A\d+)\b", ann)}
         res.add(1, "every Q in the report has an inline marker", qs <= markers_q,
@@ -277,14 +277,14 @@ def parse_cases(md: str) -> dict[str, dict]:
 def check_stage2(res: Result, d: Path, ctx: dict) -> dict:
     reqs: dict = ctx.get("reqs", {})
     res.add(2, "test-plan.md exists", (d / "test-plan.md").exists())
-    plan = (d / "test-plan.md").read_text() if (d / "test-plan.md").exists() else ""
+    plan = (d / "test-plan.md").read_text(encoding="utf-8") if (d / "test-plan.md").exists() else ""
     secs = check_sections(res, 2, "test-plan.md", plan) if plan else {}
 
     case_files = {lvl: d / f for lvl, f in LEVEL_FILES.items() if (d / f).exists()}
     res.add(2, "at least one test-cases-<level>.md exists", bool(case_files), ", ".join(p.name for p in case_files.values()))
     cases: dict[str, dict] = {}
     for lvl, path in case_files.items():
-        parsed = parse_cases(path.read_text())
+        parsed = parse_cases(path.read_text(encoding="utf-8"))
         res.add(2, f"{path.name} is not empty", bool(parsed))
         wrong_file = [c for c, v in parsed.items() if v["level_code"] != lvl]
         res.add(2, f"{path.name}: every case ID matches the file's level", not wrong_file, ", ".join(wrong_file))
@@ -385,7 +385,7 @@ def check_stage3(res: Result, d: Path, ctx: dict) -> None:
     path = d / "autotest-summary.md"
     if not res.add(3, "autotest-summary.md exists", path.exists()):
         return
-    md = path.read_text()
+    md = path.read_text(encoding="utf-8")
     secs = check_sections(res, 3, "autotest-summary.md", md)
     rows = [r for r in table_rows(find_section(secs, "mapping") or "") if r and TCID.search(r[0])]
     seen: dict[str, int] = {}
@@ -413,7 +413,7 @@ def check_stage4(res: Result, d: Path, ctx: dict) -> None:
     path = d / "qa-review-report.md"
     if not res.add(4, "qa-review-report.md exists", path.exists()):
         return
-    md = path.read_text()
+    md = path.read_text(encoding="utf-8")
     secs = check_sections(res, 4, "qa-review-report.md", md)
     summary = find_section(secs, "trace_summary") or ""
     reqs = set(ctx.get("reqs", {}))
@@ -434,7 +434,7 @@ def check_stage4(res: Result, d: Path, ctx: dict) -> None:
 
 def check_state(res: Result, state_path: Path, d: Path) -> None:
     try:
-        st = json.loads(state_path.read_text())
+        st = json.loads(state_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         res.add(0, "task state is valid JSON", False, str(e))
         return
@@ -462,7 +462,7 @@ def check_language(res: Result, d: Path, lang: str) -> None:
         p = d / f
         if not p.exists():
             continue
-        text = re.sub(r"```.*?```", "", p.read_text(), flags=re.S)
+        text = re.sub(r"```.*?```", "", p.read_text(encoding="utf-8"), flags=re.S)
         ratio = len(CYRILLIC.findall(text)) / max(1, len(re.findall(r"[A-Za-zА-Яа-яЁё]", text)))
         ok = ratio > 0.3 if lang == "ru" else ratio < 0.1
         res.add(0, f"{f} is written in the output language ({lang})", ok, f"cyrillic share {ratio:.0%}")
@@ -495,7 +495,7 @@ def run(task_dir: Path, stages: set[int] | None = None, state: Path | None = Non
         check_state(res, state, task_dir)
         if lang is None:
             try:
-                lang = json.loads(state.read_text()).get("output_language")
+                lang = json.loads(state.read_text(encoding="utf-8")).get("output_language")
             except (OSError, json.JSONDecodeError):
                 pass
     if lang in {"en", "ru"}:

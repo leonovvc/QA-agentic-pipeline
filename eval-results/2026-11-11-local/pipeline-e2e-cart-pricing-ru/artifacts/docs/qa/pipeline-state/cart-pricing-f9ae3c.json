@@ -1,0 +1,112 @@
+{
+  "task_id": "cart-pricing-f9ae3c",
+  "title": "Расчёт стоимости корзины интернет-магазина",
+  "source": {
+    "type": "text",
+    "value": "specs/cart-pricing.md"
+  },
+  "target_repo": ".",
+  "output_language": "ru",
+  "docs_dir": "docs/qa/cart-pricing-f9ae3c",
+  "status": "IN_REVIEW",
+  "created_at": "2026-11-11T18:19:52Z",
+  "updated_at": "2026-11-11T18:32:19Z",
+  "stages": [
+    {
+      "stage": 1,
+      "agent": "spec-analyst",
+      "status": "done",
+      "started_at": "2026-11-11T18:19:52Z",
+      "completed_at": "2026-11-11T18:21:29Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/spec-gap-report.md",
+        "docs/qa/cart-pricing-f9ae3c/spec-annotated.md"
+      ]
+    },
+    {
+      "stage": 2,
+      "agent": "qa-doc-writer",
+      "status": "done",
+      "started_at": "2026-11-11T18:21:29Z",
+      "completed_at": "2026-11-11T18:26:59Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/test-plan.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-unit.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-api.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-e2e.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-manual.md"
+      ]
+    },
+    {
+      "stage": 3,
+      "agent": "autotest-builder",
+      "status": "done",
+      "started_at": "2026-11-11T18:26:59Z",
+      "completed_at": "2026-11-11T18:28:22Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/autotest-summary.md",
+        "tests/test_pricing_rules.py"
+      ]
+    },
+    {
+      "stage": 4,
+      "agent": "qa-doc-reviewer",
+      "status": "done",
+      "started_at": "2026-11-11T18:28:22Z",
+      "completed_at": "2026-11-11T18:32:19Z",
+      "output": "docs/qa/cart-pricing-f9ae3c/qa-review-report.md"
+    }
+  ],
+  "assumptions_log": [],
+  "disputed_items": [],
+  "history": [
+    {
+      "at": "2026-11-11T18:19:52Z",
+      "event": "task_created"
+    },
+    {
+      "at": "2026-11-11T18:19:52Z",
+      "event": "stage_started",
+      "stage": 1
+    },
+    {
+      "at": "2026-11-11T18:21:29Z",
+      "event": "stage_completed",
+      "stage": 1
+    },
+    {
+      "at": "2026-11-11T18:21:29Z",
+      "event": "stage_started",
+      "stage": 2
+    },
+    {
+      "at": "2026-11-11T18:26:59Z",
+      "event": "stage_completed",
+      "stage": 2
+    },
+    {
+      "at": "2026-11-11T18:26:59Z",
+      "event": "stage_started",
+      "stage": 3
+    },
+    {
+      "at": "2026-11-11T18:28:22Z",
+      "event": "stage_completed",
+      "stage": 3
+    },
+    {
+      "at": "2026-11-11T18:28:22Z",
+      "event": "stage_started",
+      "stage": 4
+    },
+    {
+      "at": "2026-11-11T18:32:19Z",
+      "event": "stage_completed",
+      "stage": 4
+    },
+    {
+      "at": "2026-11-11T18:32:19Z",
+      "event": "status_IN_REVIEW"
+    }
+  ]
+}

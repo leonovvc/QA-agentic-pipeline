@@ -36,9 +36,9 @@ def failed(result) -> list[str]:
 
 
 def edit(path: Path, old: str, new: str) -> None:
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     assert old in text, f"fixture no longer contains {old!r}"
-    path.write_text(text.replace(old, new, 1))
+    path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
 
 # --- golden runs pass ----------------------------------------------------------------
@@ -83,9 +83,9 @@ def test_renumbered_inline_marker(en: Path):
 
 
 def test_empty_security_lens(en: Path):
-    text = (en / "spec-gap-report.md").read_text()
+    text = (en / "spec-gap-report.md").read_text(encoding="utf-8")
     text = re.sub(r"## Security Lens\n.*?\n\n", "## Security Lens\n\n", text, flags=re.S)
-    (en / "spec-gap-report.md").write_text(text)
+    (en / "spec-gap-report.md").write_text(text, encoding="utf-8")
     assert "security lens section is filled (findings or 'not applicable')" in failed(run(en, {1}))
 
 
@@ -119,15 +119,15 @@ def test_case_traces_to_unknown_requirement(en: Path):
 
 def test_requirement_silently_dropped(en: Path):
     # REQ-4's only case disappears and the matrix still claims coverage-less "covered"
-    text = (en / "test-cases-unit.md").read_text()
-    (en / "test-cases-unit.md").write_text(text.split("### TC-UNIT-003")[0])
+    text = (en / "test-cases-unit.md").read_text(encoding="utf-8")
+    (en / "test-cases-unit.md").write_text(text.split("### TC-UNIT-003")[0], encoding="utf-8")
     edit(en / "test-plan.md", "| REQ-4 | TC-UNIT-003 | BVA | covered |", "| REQ-4 | — | — | covered |")
     assert "every REQ is covered, or explicitly out of scope / blocked" in failed(run(en, {1, 2}))
 
 
 def test_requirement_explicitly_blocked_is_accepted(en: Path):
-    text = (en / "test-cases-unit.md").read_text()
-    (en / "test-cases-unit.md").write_text(text.split("### TC-UNIT-003")[0])
+    text = (en / "test-cases-unit.md").read_text(encoding="utf-8")
+    (en / "test-cases-unit.md").write_text(text.split("### TC-UNIT-003")[0], encoding="utf-8")
     edit(en / "test-plan.md", "| REQ-4 | TC-UNIT-003 | BVA | covered |", "| REQ-4 | — | — | blocked by Q1 |")
     assert "every REQ is covered, or explicitly out of scope / blocked" not in failed(run(en, {1, 2}))
 
@@ -159,7 +159,7 @@ def test_inverted_pyramid(en: Path):
     for lvl_file, code in (("test-cases-unit.md", "UNIT"), ("test-cases-api.md", "API")):
         p = en / lvl_file
         p.unlink()
-    (en / "test-cases-e2e.md").write_text((FIXTURES / "golden-en" / "test-cases-e2e.md").read_text())
+    (en / "test-cases-e2e.md").write_text((FIXTURES / "golden-en" / "test-cases-e2e.md").read_text(encoding="utf-8"), encoding="utf-8")
     res = run(en, {1, 2})
     assert "pyramid is not inverted (E2E share of automated cases <= 50%)" in failed(res)
 
@@ -169,6 +169,12 @@ def test_inverted_pyramid(en: Path):
 def test_case_missing_from_autotest_mapping(en: Path):
     edit(en / "autotest-summary.md", "| TC-UNIT-002 | src/cart/subtotal.test.ts | TC-UNIT-002: subtotal | passed | |\n", "")
     assert "every automatable case appears in the mapping" in failed(run(en, {3}))
+
+
+def test_mapping_read_from_the_heading_that_has_content(en: Path):
+    # seen in a recorded run: an empty Russian heading right above the English one
+    edit(en / "autotest-summary.md", "## Mapping\n", "## Соответствие кейсов и тестов\n\n## Mapping\n")
+    assert run(en, {3}).passed
 
 
 def test_invalid_autotest_status(en: Path):
@@ -196,9 +202,9 @@ def test_finding_without_severity(en: Path):
 # --- task state & language -----------------------------------------------------------
 
 def test_state_in_review_with_unfinished_stage(en: Path):
-    st = json.loads((en / "state.json").read_text())
+    st = json.loads((en / "state.json").read_text(encoding="utf-8"))
     st["stages"][2]["status"] = "in_progress"
-    (en / "state.json").write_text(json.dumps(st))
+    (en / "state.json").write_text(json.dumps(st), encoding="utf-8")
     assert "IN_REVIEW ⇒ all four stages done" in failed(run(en, state=en / "state.json"))
 
 

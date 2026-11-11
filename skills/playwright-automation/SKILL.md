@@ -282,6 +282,10 @@ test.skip(({ browserName }) => browserName === 'webkit', 'WebKit bug');
 test.fixme('known issue tracked in JIRA-1234', async ({ page }) => { /* ... */ });
 ```
 
+`test.fixme` / `test.fail` are for flaky tests and for issues a human has already chosen to
+quarantine. A test that has just found a suspected product defect in a pipeline run stays
+red — see the artifact contract's Stage 3 Mapping rule.
+
 ---
 
 ## Assertions

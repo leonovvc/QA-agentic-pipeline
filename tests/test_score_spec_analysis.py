@@ -54,7 +54,7 @@ def test_every_stage1_ground_truth_file_is_well_formed():
     files = sorted(root.glob("*/ground-truth.yaml"))
     assert files, "no ground-truth files found"
     for f in files:
-        truth = yaml.safe_load(f.read_text())
+        truth = yaml.safe_load(f.read_text(encoding="utf-8"))
         assert truth["language"] in {"en", "ru"}, f
         ids = [d["id"] for d in truth["defects"]]
         assert len(ids) == len(set(ids)) >= 5, f

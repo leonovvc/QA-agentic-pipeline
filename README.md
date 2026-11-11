@@ -102,7 +102,7 @@ Three layers, from free and deterministic to real model runs. Details and how to
 | Layer | What it proves | Runs |
 |---|---|---|
 | **Static validation** — [`validate_plugin.py`](tools/validate_plugin.py) + `claude plugin validate` | Every skill and agent is well-formed; no reference to a skill that isn't shipped; contract and skills agree; attribution in sync | Every push (CI) |
-| **Contract checks** — [`check_artifacts.py`](tools/check_artifacts.py) + 42 pytest tests | The checker accepts correct pipeline output (EN and RU golden runs) and rejects each kind of violation: lost requirement, renumbered marker, missing case field, inverted pyramid, unmapped case, unrated finding… | Every push (CI) |
+| **Contract checks** — [`check_artifacts.py`](tools/check_artifacts.py) + 47 pytest tests | The checker accepts correct pipeline output (EN and RU golden runs) and rejects each kind of violation: lost requirement, renumbered marker, missing case field, inverted pyramid, unmapped case, unrated finding… | Every push (CI) |
 | **Behavioral evals** — `claude plugin eval` suite in [`evals/`](evals) | Real runs of the agents on specs with **planted defects**, graded by regex, tool-use, file and LLM-judge graders | Manual workflow; recorded results in [`eval-results/`](eval-results) |
 
 <!-- EVAL-RESULTS:START -->
@@ -122,6 +122,10 @@ Three layers, from free and deterministic to real model runs. Details and how to
 ¹ Grader false negatives found while reading the transcripts (a too-narrow regex; an `input_match` that matched file *content* instead of the path) — fixed in `evals/`; the recorded artifacts show the agents' behaviour was correct.
 ² The agent logged 20 assumptions but marked none inline in the annotated spec — a real, minor contract deviation the checker caught.
 ³ **A real defect found by the evals:** asked "make autotests for these cases", Claude wrote correct tests itself instead of dispatching `autotest-builder`, so no `autotest-summary.md` or task-state update. Agent and skill trigger descriptions were fixed; the [re-run on 2026-10-30](eval-results/2026-10-30-stage3-rerun) dispatched `autotest-builder` and scored 1.00.
+
+**Cost of one full pass — 2026-11-11** ([run 1](eval-results/2026-11-11-local), [2](eval-results/2026-11-11-local-rerun), [3](eval-results/2026-11-11-local-rerun2), [details](docs/evals.md#cost-of-one-run)): the whole pipeline on a one-page RU spec (→ 19–20 REQs, 20–41 cases, the planted bug reported) took **≈1.8–3M tokens and $1.64–2.13 (median $1.73)** on Claude Sonnet 5.5, 9–13 minutes. 84–89% of the input is read from the prompt cache; the bill is mostly output (~47%) and cache writes (~42%). Run 1, by stage: orchestrator $0.50 · spec analysis $0.19 · test design $0.63 · autotests $0.26 · review $0.54. A second new case runs Stage 3 on a repo **with no tests at all**.
+
+⁴ **A second defect found by the evals:** when `autotest-builder`'s pytest command was denied, the main thread ran the tests itself and rewrote `autotest-summary.md` without Stack Profile or Mapping (contract 57/60). Fixed with an orchestrator rule ("never do a stage's work") and an agent rule (retry denied commands plainly, else record them `not run`), guarded by three new graders on *who* wrote and ran what; the re-run scored 60/60 with the main thread writing nothing. A third: `autotest-builder` once marked the defect-finding test `xfail` to keep CI green; the rule "it stays red" is now in the agent, the contract and the review skill, with a grader — the next two runs left it red.
 <!-- EVAL-RESULTS:END -->
 
 ## Repository layout

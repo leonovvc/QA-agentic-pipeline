@@ -32,19 +32,19 @@ def test_repository_plugin_is_valid():
 
 def test_detects_skill_name_not_matching_directory(plugin_copy: Path):
     md = plugin_copy / "skills" / "unit-testing" / "SKILL.md"
-    md.write_text(md.read_text().replace("name: unit-testing", "name: unit-tests", 1))
+    md.write_text(md.read_text(encoding="utf-8").replace("name: unit-testing", "name: unit-tests", 1), encoding="utf-8")
     assert any("frontmatter name 'unit-tests' != directory name" in e for e in errors_for(plugin_copy))
 
 
 def test_detects_dangling_reference_to_upstream_skill(plugin_copy: Path):
     md = plugin_copy / "skills" / "api-testing" / "SKILL.md"
-    md.write_text(md.read_text() + "\nFor CI wiring see `ci-cd-integration`.\n")
+    md.write_text(md.read_text(encoding="utf-8") + "\nFor CI wiring see `ci-cd-integration`.\n", encoding="utf-8")
     assert any("'ci-cd-integration', which this plugin does not ship" in e for e in errors_for(plugin_copy))
 
 
 def test_detects_related_skill_that_does_not_exist(plugin_copy: Path):
     md = plugin_copy / "skills" / "test-planning" / "SKILL.md"
-    md.write_text(md.read_text().replace("## Related Skills\n", "## Related Skills\n\n- **release-gate** -- decides go/no-go.\n", 1))
+    md.write_text(md.read_text(encoding="utf-8").replace("## Related Skills\n", "## Related Skills\n\n- **release-gate** -- decides go/no-go.\n", 1), encoding="utf-8")
     assert any("related skill 'release-gate' does not exist" in e for e in errors_for(plugin_copy))
 
 
@@ -55,7 +55,7 @@ def test_detects_missing_reference_file(plugin_copy: Path):
 
 def test_detects_agent_preloading_unknown_skill(plugin_copy: Path):
     md = plugin_copy / "agents" / "qa-doc-writer.md"
-    md.write_text(md.read_text().replace("  - test-planning\n", "  - test-plannning\n", 1))
+    md.write_text(md.read_text(encoding="utf-8").replace("  - test-planning\n", "  - test-plannning\n", 1), encoding="utf-8")
     assert any("preloads skill 'test-plannning'" in e for e in errors_for(plugin_copy))
 
 
@@ -68,18 +68,18 @@ def test_detects_broken_contract_path(plugin_copy: Path):
 
 def test_detects_description_over_limit(plugin_copy: Path):
     md = plugin_copy / "skills" / "test-pyramid-strategy" / "SKILL.md"
-    text = md.read_text()
-    md.write_text(text.replace("Use when:", "Use when: " + "very " * 250, 1))
+    text = md.read_text(encoding="utf-8")
+    md.write_text(text.replace("Use when:", "Use when: " + "very " * 250, 1), encoding="utf-8")
     assert any("test-pyramid-strategy: description is" in e for e in errors_for(plugin_copy))
 
 
 def test_detects_attribution_drift(plugin_copy: Path):
     notices = plugin_copy / "THIRD_PARTY_NOTICES.md"
-    notices.write_text("\n".join(l for l in notices.read_text().splitlines() if not l.startswith("| `api-testing`")))
+    notices.write_text("\n".join(l for l in notices.read_text(encoding="utf-8").splitlines() if not l.startswith("| `api-testing`")), encoding="utf-8")
     assert any("does not list adapted skill 'api-testing'" in e for e in errors_for(plugin_copy))
 
 
 def test_detects_unbalanced_code_fence(plugin_copy: Path):
     md = plugin_copy / "skills" / "qa-doc-review" / "SKILL.md"
-    md.write_text(md.read_text() + "\n```markdown\nunterminated\n")
+    md.write_text(md.read_text(encoding="utf-8") + "\n```markdown\nunterminated\n", encoding="utf-8")
     assert any("qa-doc-review/SKILL.md: unbalanced" in e for e in errors_for(plugin_copy))

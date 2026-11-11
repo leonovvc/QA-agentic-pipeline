@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: stage3-greenfield-no-tests-ru
+context:
+  scaffold_script: scaffold.sh

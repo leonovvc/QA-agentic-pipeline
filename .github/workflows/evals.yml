@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Run only cases with this tag (stage1, stage2, stage3, stage4, orchestration, routing). Empty = all."
+        description: "Run only cases with this tag (stage1, stage2, stage3, stage4, orchestration, e2e, routing). Empty = all."
         required: false
         default: ""
       runs:
@@ -48,12 +48,22 @@ jobs:
             --judge-model claude-sonnet-5-5 \
             --no-publish \
             --keep-temp \
+            --output-dir evals-out \
             --json evals-result.json \
             --max-cost-usd 40
+      - name: Record artifacts, contract scores and token cost per stage
+        if: always()
+        run: |
+          python tools/collect_eval_run.py --results evals-out --kept /tmp/claude-eval-* \
+            --run-id "ci-${{ github.run_id }}"
+          for f in eval-results/ci-${{ github.run_id }}/*/usage-ledger.json; do
+            [ -f "$f" ] && { echo "== $(dirname "$f")"; python tools/measure_run_cost.py --ledger "$f"; }
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: eval-results
           path: |
             evals-result.json
-            evals/results/
+            evals-out/
+            eval-results/

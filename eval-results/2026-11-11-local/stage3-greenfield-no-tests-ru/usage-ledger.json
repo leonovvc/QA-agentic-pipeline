@@ -1,0 +1,158 @@
+{
+ "calls": [
+  {
+   "id": "msg_011Cgwbsnemopj4y9c6tfJRr",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 13548,
+   "cache_read": 12438,
+   "output": 539,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011CgwbtADpEPZz8quqGa3L5",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 968,
+   "cache_read": 25986,
+   "output": 181,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011CgwbwX61MwpQs7fYuRDN4",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 2131,
+   "cache_read": 26954,
+   "output": 204,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011Cgwbwg3mXXydfKSPxxzyz",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 263,
+   "cache_read": 29085,
+   "output": 175,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011CgwbwsBVzMQXiiLK8Xojj",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 234,
+   "cache_read": 29348,
+   "output": 137,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011Cgwbx3rwD1VxvYg6fZzRP",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 2031,
+   "cache_read": 29582,
+   "output": 161,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011CgwbxBoBWJdQkQrvv7fLV",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 887,
+   "cache_read": 31613,
+   "output": 1517,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011CgwbxsAH4yKjxJxhUvZUw",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 0,
+   "cache_write_1h": 2017,
+   "cache_read": 32500,
+   "output": 498,
+   "bucket": "Orchestrator (main thread)"
+  },
+  {
+   "id": "msg_011Cgwbt7ZaPQJxs8KFUa7Vo",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 14933,
+   "cache_write_1h": 0,
+   "cache_read": 7034,
+   "output": 281,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  },
+  {
+   "id": "msg_011CgwbtMu35qqjjGZXxn16K",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 5339,
+   "cache_write_1h": 0,
+   "cache_read": 21967,
+   "output": 208,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  },
+  {
+   "id": "msg_011CgwbtaFRhSU8CTMxVTUiU",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 2814,
+   "cache_write_1h": 0,
+   "cache_read": 27306,
+   "output": 2344,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  },
+  {
+   "id": "msg_011CgwbucXsUkB2Fnp6BeS6a",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 2585,
+   "cache_write_1h": 0,
+   "cache_read": 30120,
+   "output": 459,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  },
+  {
+   "id": "msg_011CgwbuvtgwxgFYw9M8MkG1",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 568,
+   "cache_write_1h": 0,
+   "cache_read": 32705,
+   "output": 2336,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  },
+  {
+   "id": "msg_011CgwbvoYgouNe886m26isz",
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "cache_write_5m": 2781,
+   "cache_write_1h": 0,
+   "cache_read": 33273,
+   "output": 1359,
+   "bucket": "Stage 3 \u2014 autotest-builder"
+  }
+ ],
+ "harness": {
+  "total_cost_usd": 0.30190310000000004,
+  "num_turns": 10,
+  "model_usage": {
+   "claude-sonnet-5-5": {
+    "inputTokens": 28,
+    "outputTokens": 10399,
+    "cacheReadInputTokens": 369911,
+    "cacheCreationInputTokens": 51099,
+    "costUSD": 0.30190310000000004
+   }
+  }
+ },
+ "wall_seconds": 73.101
+}

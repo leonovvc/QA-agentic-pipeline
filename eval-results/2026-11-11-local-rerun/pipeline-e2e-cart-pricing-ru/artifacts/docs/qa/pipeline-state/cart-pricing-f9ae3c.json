@@ -1,0 +1,132 @@
+{
+  "task_id": "cart-pricing-f9ae3c",
+  "title": "Расчёт стоимости корзины интернет-магазина",
+  "source": {
+    "type": "text",
+    "value": "specs/cart-pricing.md"
+  },
+  "target_repo": ".",
+  "output_language": "ru",
+  "docs_dir": "docs/qa/cart-pricing-f9ae3c",
+  "status": "IN_REVIEW",
+  "created_at": "2026-11-11T19:08:07Z",
+  "updated_at": "2026-11-11T19:17:39Z",
+  "stages": [
+    {
+      "stage": 1,
+      "agent": "spec-analyst",
+      "status": "done",
+      "started_at": "2026-11-11T19:08:07Z",
+      "completed_at": "2026-11-11T19:09:56Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/spec-source.md",
+        "docs/qa/cart-pricing-f9ae3c/spec-gap-report.md",
+        "docs/qa/cart-pricing-f9ae3c/spec-annotated.md"
+      ]
+    },
+    {
+      "stage": 2,
+      "agent": "qa-doc-writer",
+      "status": "done",
+      "started_at": "2026-11-11T19:09:56Z",
+      "completed_at": "2026-11-11T19:12:44Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/test-plan.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-unit.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-api.md",
+        "docs/qa/cart-pricing-f9ae3c/test-cases-manual.md"
+      ]
+    },
+    {
+      "stage": 3,
+      "agent": "autotest-builder",
+      "status": "done",
+      "started_at": "2026-11-11T19:12:44Z",
+      "completed_at": "2026-11-11T19:13:57Z",
+      "output": [
+        "docs/qa/cart-pricing-f9ae3c/autotest-summary.md",
+        "tests/test_pricing_rules.py",
+        "tests/test_cart_lines.py"
+      ]
+    },
+    {
+      "stage": 4,
+      "agent": "qa-doc-reviewer",
+      "status": "done",
+      "started_at": "2026-11-11T19:13:57Z",
+      "completed_at": "2026-11-11T19:17:39Z",
+      "output": "docs/qa/cart-pricing-f9ae3c/qa-review-report.md"
+    }
+  ],
+  "assumptions_log": [
+    "A1: округление скидки half-up до 0.01 (Q3)",
+    "A2: пороги 3000/5000 сравниваются с subtotal до скидки (Q10)",
+    "A3: пустая корзина — утверждаем только subtotal=0 (Q2)",
+    "A4: лимит 1..20 на строку, повтор sku = разные строки (Q8)",
+    "A5: quantity целое; price>0, ≤2 знаков; суммы с 2 знаками (Q11)",
+    "A6: N=5000.00-subtotal; строка видна при subtotal<5000 (Q9)",
+    "A7: price/is_member/is_sale_period принимаются как есть (Q5)",
+    "A8: распродажа отключает только скидку участника",
+    "A9: поле со строками в теле запроса — lines",
+    "A10: расчёт итога и эндпоинт будут добавлены; API-кейсы not run до появления",
+    "A11: E2E-автотестов нет, UI-проверки ручные",
+    "A12: шкала приоритетов по Score 20-25 P0, 12-19 P1, 6-11 P2, <=5 P3",
+    "A13: вероятность дефекта REQ-8 =4 из-за > vs >="
+  ],
+  "disputed_items": [
+    "TC-UNIT-008: xfail(strict) или красный тест",
+    "REQ-2/REQ-6 заблокированы Q7: писать ли частичные ручные кейсы",
+    "Безопасность Q5/Q6: добавлять ли слабо-оракульные негативные кейсы",
+    "Уровень TC-API-002..004: unit (запросить функцию итога) или API"
+  ],
+  "history": [
+    {
+      "at": "2026-11-11T19:08:07Z",
+      "event": "task_created"
+    },
+    {
+      "at": "2026-11-11T19:08:07Z",
+      "event": "stage_started",
+      "stage": 1
+    },
+    {
+      "at": "2026-11-11T19:09:56Z",
+      "event": "stage_completed",
+      "stage": 1
+    },
+    {
+      "at": "2026-11-11T19:09:56Z",
+      "event": "stage_started",
+      "stage": 2
+    },
+    {
+      "at": "2026-11-11T19:12:44Z",
+      "event": "stage_completed",
+      "stage": 2
+    },
+    {
+      "at": "2026-11-11T19:12:44Z",
+      "event": "stage_started",
+      "stage": 3
+    },
+    {
+      "at": "2026-11-11T19:13:57Z",
+      "event": "stage_completed",
+      "stage": 3
+    },
+    {
+      "at": "2026-11-11T19:13:57Z",
+      "event": "stage_started",
+      "stage": 4
+    },
+    {
+      "at": "2026-11-11T19:17:39Z",
+      "event": "stage_completed",
+      "stage": 4
+    },
+    {
+      "at": "2026-11-11T19:17:39Z",
+      "event": "checkpoint_assembled"
+    }
+  ]
+}

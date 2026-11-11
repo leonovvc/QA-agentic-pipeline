@@ -1,0 +1,135 @@
+{
+  "case": "pipeline-e2e-cart-pricing-ru",
+  "artifacts": [
+    "docs\\qa\\cart-pricing-f9ae3c\\autotest-summary.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\checkpoint.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\qa-review-report.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\spec-annotated.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\spec-gap-report.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\spec-source.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\test-cases-api.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\test-cases-e2e.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\test-cases-manual.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\test-cases-unit.md",
+    "docs\\qa\\cart-pricing-f9ae3c\\test-plan.md",
+    "docs\\qa\\pipeline-state\\board.md",
+    "docs\\qa\\pipeline-state\\cart-pricing-f9ae3c.json",
+    "tests\\conftest.py",
+    "tests\\test_cart_lines.py",
+    "tests\\test_cart_pricing.py"
+  ],
+  "tool_calls": {
+    "Skill": 2,
+    "Bash": 15,
+    "Read": 27,
+    "Write": 22,
+    "Agent": 4,
+    "Glob": 1
+  },
+  "task_dirs": {
+    "cart-pricing-f9ae3c": {
+      "contract_checks_total": 71,
+      "contract_checks_failed": 1,
+      "failed_checks": [
+        "[stage 1] every A in the report has an inline marker (missing markers: A1, A2, A8, A9)"
+      ]
+    }
+  },
+  "agents_dispatched": [
+    "qa-agentic-pipeline:autotest-builder",
+    "qa-agentic-pipeline:qa-doc-reviewer",
+    "qa-agentic-pipeline:qa-doc-writer",
+    "qa-agentic-pipeline:spec-analyst"
+  ],
+  "skills_invoked": [
+    "qa-agentic-pipeline:qa-pipeline-task-state",
+    "qa-agentic-pipeline:run-qa-pipeline"
+  ],
+  "cost": {
+    "rows": [
+      {
+        "bucket": "Orchestrator (main thread)",
+        "input": 34,
+        "cache_write_5m": 0,
+        "cache_write_1h": 56914,
+        "cache_read": 773243,
+        "output": 16969,
+        "api_calls": 17,
+        "input_total": 830191,
+        "cost_usd": 0.4747,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 1 — spec-analyst",
+        "input": 6,
+        "cache_write_5m": 33286,
+        "cache_write_1h": 0,
+        "cache_read": 39758,
+        "output": 11076,
+        "api_calls": 3,
+        "input_total": 73050,
+        "cost_usd": 0.198,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 2 — qa-doc-writer",
+        "input": 8,
+        "cache_write_5m": 71656,
+        "cache_write_1h": 0,
+        "cache_read": 125335,
+        "output": 26146,
+        "api_calls": 4,
+        "input_total": 196999,
+        "cost_usd": 0.4531,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 3 — autotest-builder",
+        "input": 14,
+        "cache_write_5m": 36368,
+        "cache_write_1h": 0,
+        "cache_read": 200765,
+        "output": 8295,
+        "api_calls": 7,
+        "input_total": 237147,
+        "cost_usd": 0.194,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      },
+      {
+        "bucket": "Stage 4 — qa-doc-reviewer",
+        "input": 14,
+        "cache_write_5m": 75051,
+        "cache_write_1h": 0,
+        "cache_read": 264222,
+        "output": 19149,
+        "api_calls": 7,
+        "input_total": 339287,
+        "cost_usd": 0.4056,
+        "models": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    ],
+    "total": {
+      "input": 76,
+      "cache_write_5m": 216361,
+      "cache_write_1h": 56914,
+      "cache_read": 1403323,
+      "output": 81635,
+      "api_calls": 38,
+      "input_total": 1676674,
+      "cost_usd": 1.7254
+    },
+    "harness_total_cost_usd": 1.7253927999999998,
+    "num_turns": 31,
+    "wall_seconds": 563.434
+  }
+}

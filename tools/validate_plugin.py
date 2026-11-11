@@ -96,7 +96,7 @@ def validate(root: Path) -> Report:
     manifest = {}
     if manifest_path.exists():
         try:
-            manifest = json.loads(manifest_path.read_text())
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
             r.check(False, f"plugin.json is not valid JSON: {e}")
     for key in ("name", "version", "description", "license"):
@@ -107,7 +107,7 @@ def validate(root: Path) -> Report:
     market_path = root / ".claude-plugin" / "marketplace.json"
     if market_path.exists():
         try:
-            market = json.loads(market_path.read_text())
+            market = json.loads(market_path.read_text(encoding="utf-8"))
             names = [p.get("name") for p in market.get("plugins", [])]
             r.check(manifest.get("name") in names, "marketplace.json does not list this plugin by name")
         except json.JSONDecodeError as e:
@@ -127,7 +127,7 @@ def validate(root: Path) -> Report:
         r.check(md.exists(), f"skills/{name}: missing SKILL.md")
         if not md.exists():
             continue
-        text = md.read_text()
+        text = md.read_text(encoding="utf-8")
         fm, body = split_frontmatter(text)
         r.check(fm is not None, f"skills/{name}/SKILL.md: missing or invalid YAML frontmatter")
         if fm is None:
@@ -156,7 +156,7 @@ def validate(root: Path) -> Report:
         for ref in sorted(set(re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}/([A-Za-z0-9_./-]+)", text))):
             r.check((root / ref).exists(), f"skills/{name}: points at ${{CLAUDE_PLUGIN_ROOT}}/{ref}, which does not exist")
         for ref_file in (sdir / "references").glob("*.md") if (sdir / "references").exists() else []:
-            rt = ref_file.read_text()
+            rt = ref_file.read_text(encoding="utf-8")
             r.check(fenced_blocks_balanced(rt), f"skills/{name}/references/{ref_file.name}: unbalanced code fences")
             for dangling in sorted(UPSTREAM_ONLY_SKILLS):
                 r.check(re.search(rf"`{dangling}`", rt) is None,
@@ -165,7 +165,7 @@ def validate(root: Path) -> Report:
     # --- agents ---------------------------------------------------------------------
     for agent in agent_names:
         path = root / "agents" / f"{agent}.md"
-        fm, body = split_frontmatter(path.read_text())
+        fm, body = split_frontmatter(path.read_text(encoding="utf-8"))
         r.check(fm is not None, f"agents/{agent}.md: missing or invalid frontmatter")
         if fm is None:
             continue
@@ -187,7 +187,7 @@ def validate(root: Path) -> Report:
 
     # --- orchestrator wiring --------------------------------------------------------
     orch_path = skills_dir / "run-qa-pipeline" / "SKILL.md"
-    orch = orch_path.read_text() if orch_path.exists() else ""
+    orch = orch_path.read_text(encoding="utf-8") if orch_path.exists() else ""
     for agent in agent_names:
         r.check(f"`{agent}`" in orch, f"run-qa-pipeline does not orchestrate agent '{agent}'")
     stage_rows = re.findall(r"^\| \d \| `([a-z-]+)` \| (.+?) \|", orch, re.M)
@@ -200,9 +200,9 @@ def validate(root: Path) -> Report:
     # --- artifact contract drift ----------------------------------------------------
     contract_path = skills_dir / "run-qa-pipeline" / "references" / "artifact-contract.md"
     r.check(contract_path.exists(), "missing skills/run-qa-pipeline/references/artifact-contract.md")
-    contract = contract_path.read_text() if contract_path.exists() else ""
+    contract = contract_path.read_text(encoding="utf-8") if contract_path.exists() else ""
     tcm_path = skills_dir / "test-case-management" / "SKILL.md"
-    tcm = tcm_path.read_text() if tcm_path.exists() else ""
+    tcm = tcm_path.read_text(encoding="utf-8") if tcm_path.exists() else ""
     for label in CASE_FIELDS_EN:
         r.check(f"| {label} |" in contract, f"artifact contract: field label table lacks '{label}'")
         r.check(f"**{label}**" in tcm, f"test-case-management: pipeline format lacks field '{label}'")
@@ -210,7 +210,7 @@ def validate(root: Path) -> Report:
         r.check(prefix in contract, f"artifact contract: ID '{prefix}' not defined")
 
     # --- attribution ----------------------------------------------------------------
-    notices = (root / "THIRD_PARTY_NOTICES.md").read_text() if (root / "THIRD_PARTY_NOTICES.md").exists() else ""
+    notices = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8") if (root / "THIRD_PARTY_NOTICES.md").exists() else ""
     r.check(bool(notices), "missing THIRD_PARTY_NOTICES.md")
     r.check("MIT License" in notices and "Petr Kindlmann" in notices,
             "THIRD_PARTY_NOTICES.md must keep the upstream MIT notice and copyright")

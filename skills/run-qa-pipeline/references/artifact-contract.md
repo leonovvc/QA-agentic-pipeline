@@ -146,7 +146,9 @@ Required sections:
 2. `## Mapping` [`## Соответствие кейсов и тестов`] — table:
    `TC | File | Test | Status | Notes` where Status ∈ `passed`, `failed`,
    `not run`, `manual`. `failed` rows say whether it is a suspected product defect or a
-   test defect; `not run` rows say exactly what was missing.
+   test defect; `not run` rows say exactly what was missing. A test that found a suspected
+   product defect stays red: no expected-failure or skip marker (`xfail`, `test.fail`,
+   `test.fixme`, `it.failing`, …) — quarantining it is the human's decision.
 3. `## Commands Run` [`## Выполненные команды`] — the exact commands and their exit codes
 4. `## Suspected Product Defects` [`## Предполагаемые дефекты продукта`]
 5. `## Allocation Disagreements` [`## Несогласие с распределением`] — cases whose level

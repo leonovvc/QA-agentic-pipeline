@@ -66,7 +66,8 @@ fake timers, and mutation testing as a behavior check on top of coverage.
   missing or broken (see Coverage), report it in `autotest-summary.md` as a recommendation;
   changing shared CI is the human's call.
 - **A failing test that matches the case is a finding, not a bug in the test.** Report it as
-  a suspected product defect; never loosen the assertion to go green.
+  a suspected product defect; never loosen the assertion to go green, and never mark the
+  test `xfail`/`skip` (or the framework's equivalent) — it stays red until a human decides.
 
 ---
 

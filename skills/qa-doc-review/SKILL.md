@@ -63,6 +63,8 @@ Check `.agents/qa-project-context.md` first. Read the artifacts from `docs/qa/<t
 - **Minor** — quality/clarity issue (weak case description, minor duplication) worth fixing but not blocking.
 - **Disputed — needs human decision** — a genuine judgment call where the reviewer's own view differs from the writer's and reasonable QA engineers could land either way (scope boundaries, risk-acceptance trade-offs, priority calls). Never downgrade a Disputed item to a severity level to force a resolution — pass it through as-is.
 
+A test for a suspected product defect that Stage 3 marked expected-to-fail or skipped (`xfail`, `test.fail`, `test.fixme`, `it.failing`, …) is a **Major** finding against Stage 3, not a Disputed item: the contract settles it — the test stays red. The human's real choice (fix the code, change the spec, or quarantine the test) belongs in the defect's entry, not in a dispute about the marker.
+
 ## Output Contract
 
 `docs/qa/<task-id>/qa-review-report.md`:
